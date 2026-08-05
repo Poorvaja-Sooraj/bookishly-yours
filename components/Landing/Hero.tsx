@@ -13,10 +13,10 @@ const Flourish = () => (
 export default function Hero() {
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen w-full bg-[#F8F5F2] bg-[url('/landing_bg_mb.png')] md:bg-[url('/landing_bg_desk.png')] bg-cover md:bg-[length:100%_100%] bg-center bg-no-repeat px-6 pt-8 pb-12 md:pt-12 md:pb-24 text-center select-none overflow-hidden">
-      
+
       {/* Main Content Container */}
       <div className="relative z-10 flex flex-col items-center max-w-3xl w-full">
-        
+
         {/* Logo Container - Pure logo without any blurred box or white overlay */}
         <div className="relative w-full max-w-[680px] h-auto mt-6 md:mt-0 -mb-5 animate-fade-in flex items-center justify-center">
           <Image

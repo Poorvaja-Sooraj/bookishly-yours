@@ -14,12 +14,64 @@ export default function AuthPage() {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (activeTab === "login") {
-      console.log("Login submitted:", { loginEmail, loginPassword });
-    } else {
-      console.log("Signup submitted:", { signupUsername, signupEmail, signupPassword });
+
+    try {
+      if (activeTab === "signup") {
+        const response = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: signupUsername,
+            email: signupEmail,
+            password: signupPassword,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert("Account created successfully!");
+
+          setSignupUsername("");
+          setSignupEmail("");
+          setSignupPassword("");
+
+          window.location.href = "/dashboard";
+        } else {
+          alert(data.message);
+        }
+      } else {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: loginEmail,
+            password: loginPassword,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert("Login successful!");
+
+          setLoginEmail("");
+          setLoginPassword("");
+
+          window.location.href = "/dashboard";
+        } else {
+          alert(data.message);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong.");
     }
   };
 
@@ -27,10 +79,10 @@ export default function AuthPage() {
     <div className="relative flex flex-col items-center justify-center min-h-screen w-full bg-[#F8F5F2] bg-[url('/login_pg_mb.png')] md:bg-[url('/login_bg_desk.png')] bg-cover md:bg-[length:100%_100%] bg-center bg-no-repeat px-4 py-8 select-none overflow-y-auto">
       {/* Main Fixed Content Container */}
       <div className="relative z-10 flex flex-col items-center w-full max-w-md mx-auto my-auto">
-        
+
         {/* 1. Fixed Logo Container */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="relative w-full max-w-[420px] md:max-w-[480px] h-auto mb-4 md:mb-5 flex items-center justify-center cursor-pointer block"
         >
           <Image
@@ -45,30 +97,27 @@ export default function AuthPage() {
 
         {/* 2. Fixed Auth Card Container */}
         <div className="relative z-10 w-full max-w-sm flex flex-col items-center">
-          
+
           {/* Fixed Tab Switcher Header */}
           <div className="relative flex w-full p-1 bg-[#EBE4D8]/90 backdrop-blur-xs rounded-2xl border border-[#3E2C23]/15 shadow-inner mb-4">
             {/* Sliding Pill Indicator */}
             <div
-              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#4E3524] rounded-xl shadow-md transition-all duration-300 ease-out ${
-                activeTab === "login" ? "left-1" : "left-[calc(50%+2px)]"
-              }`}
+              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#4E3524] rounded-xl shadow-md transition-all duration-300 ease-out ${activeTab === "login" ? "left-1" : "left-[calc(50%+2px)]"
+                }`}
             />
             <button
               type="button"
               onClick={() => setActiveTab("login")}
-              className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${
-                activeTab === "login" ? "text-[#F8F5F2]" : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
-              }`}
+              className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${activeTab === "login" ? "text-[#F8F5F2]" : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
+                }`}
             >
               Login
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("signup")}
-              className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${
-                activeTab === "signup" ? "text-[#F8F5F2]" : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
-              }`}
+              className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${activeTab === "signup" ? "text-[#F8F5F2]" : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
+                }`}
             >
               Sign Up
             </button>
@@ -76,7 +125,7 @@ export default function AuthPage() {
 
           {/* Single Fixed Form Container */}
           <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
-            
+
             {/* Fixed-Height Input Slot (152px) to keep exact button and layout position */}
             <div className="w-full h-[152px] flex flex-col justify-center mb-3">
               {activeTab === "login" ? (
