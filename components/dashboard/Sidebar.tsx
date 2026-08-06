@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   BookOpen,
@@ -22,12 +23,14 @@ export default function Sidebar({
   mobileOpen = false,
   setMobileOpen,
 }: SidebarProps) {
+  const pathname = usePathname();
+
   const menuItems = [
-    { label: "Dashboard", icon: LayoutDashboard, active: true },
-    { label: "All Books", icon: Library, active: false },
-    { label: "Completed Books", icon: BookCheck, active: false },
-    { label: "Currently Reading", icon: BookOpen, active: false },
-    { label: "Want to Read", icon: Bookmark, active: false },
+    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { label: "All Books", href: "/dashboard/all-books", icon: Library },
+    { label: "Completed Books", href: "/dashboard/completed", icon: BookCheck },
+    { label: "Currently Reading", href: "/dashboard/currently-reading", icon: BookOpen },
+    { label: "Want to Read", href: "/dashboard/want-to-read", icon: Bookmark },
   ];
 
   const renderContent = (isMobile = false) => (
@@ -56,23 +59,29 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Navigation items (UI-only) */}
+        {/* Navigation items */}
         <nav className="space-y-1 md:space-y-1.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isActive =
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);
+
             return (
-              <button
+              <Link
                 key={item.label}
-                type="button"
+                href={item.href}
+                onClick={() => isMobile && setMobileOpen?.(false)}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium transition-all duration-200 cursor-pointer ${
-                  item.active
+                  isActive
                     ? "bg-[#4E3524] text-[#F8F5F2] shadow-md border border-[#6E5440]/30 font-semibold"
                     : "text-[#D4C3B3] hover:bg-[#3E2C23]/80 hover:text-[#F8F5F2]"
                 }`}
               >
-                <Icon className={`w-4.5 h-4.5 ${item.active ? "text-[#E6B89C]" : "text-[#B8A08C]"}`} />
+                <Icon className={`w-4.5 h-4.5 ${isActive ? "text-[#E6B89C]" : "text-[#B8A08C]"}`} />
                 <span>{item.label}</span>
-              </button>
+              </Link>
             );
           })}
         </nav>
