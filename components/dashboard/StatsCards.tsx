@@ -1,36 +1,41 @@
+"use client";
+
 import React from "react";
 import { Library, BookCheck, BookOpen, Bookmark } from "lucide-react";
+import { useBooks } from "@/context/BookContext";
 
 export default function StatsCards() {
+  const { stats: liveStats } = useBooks();
+
   const stats = [
     {
       title: "Total Books",
-      value: 0,
+      value: liveStats.total,
       icon: Library,
       color: "bg-[#1A2B4C]/10 text-[#1A2B4C]",
     },
     {
       title: "Completed Books",
-      value: 0,
+      value: liveStats.completed,
       icon: BookCheck,
       color: "bg-[#1A2B4C]/10 text-[#1A2B4C]",
     },
     {
       title: "Currently Reading",
-      value: 0,
+      value: liveStats.currentlyReading,
       icon: BookOpen,
       color: "bg-[#1A2B4C]/10 text-[#1A2B4C]",
     },
     {
       title: "Want to Read",
-      value: 0,
+      value: liveStats.wantToRead,
       icon: Bookmark,
       color: "bg-[#1A2B4C]/10 text-[#1A2B4C]",
     },
   ];
 
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-3.5 shrink-0">
+    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-3.5 shrink-0 select-none">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (

@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-plus-jakarta);
   --font-serif: var(--font-playfair);
+  --font-script: var(--font-great-vibes);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -23,6 +24,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  scrollbar-gutter: stable;
 }
 
 @keyframes fadeIn {
@@ -46,4 +48,13 @@ body {
 
 .animation-delay-300 {
   animation-delay: 300ms;
+}
+
+/* Utility: hide scrollbar (used by WheelPicker) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
