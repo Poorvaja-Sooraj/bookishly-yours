@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { MoreVertical, Trash2 } from "lucide-react";
+import { MoreVertical, Trash2, Star, StarHalf } from "lucide-react";
 import { useBooks } from "@/context/BookContext";
 
 export interface ReadingSession {
@@ -29,6 +29,7 @@ export interface Book {
   totalTimeSpent?: number; // seconds
   sessionsCount?: number;
   sessions?: ReadingSession[];
+  rating?: number;
   createdAt?: string | Date;
 
   // UI-only fields
@@ -167,6 +168,31 @@ export default function BookCard({
         <p className="font-sans text-xs sm:text-sm text-[#6E5440]/80 mt-0.5 line-clamp-1 w-full" title={book.author}>
           {book.author}
         </p>
+        {/* Star rating — only shown after user has submitted a rating */}
+        {(book.rating ?? 0) > 0 && (
+          <div className="flex items-center gap-0.5 mt-1.5">
+            {[1, 2, 3, 4, 5].map((s) => {
+              const r = book.rating ?? 0;
+              if (s <= Math.floor(r)) {
+                return <Star key={s} className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />;
+              }
+              if (s === Math.ceil(r) && r % 1 !== 0) {
+                return (
+                  <span key={s} className="relative w-3.5 h-3.5 inline-block">
+                    <Star className="w-3.5 h-3.5 text-[#D5C9B8] absolute inset-0" />
+                    <span className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
+                      <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
+                    </span>
+                  </span>
+                );
+              }
+              return <Star key={s} className="w-3.5 h-3.5 text-[#D5C9B8]" />;
+            })}
+            <span className="text-[10px] font-sans font-bold text-[#2C1D11] ml-0.5">
+              {book.rating}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

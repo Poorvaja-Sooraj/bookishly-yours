@@ -89,15 +89,15 @@ export async function POST(
             book.startedDate = new Date();
         }
 
-        // Mark complete if finished
+        // Mark complete if finished, else transition to Currently Reading
         if (book.currentPage >= book.totalPages) {
             book.readingStatus = "Completed";
             if (!book.finishedDate) {
                 book.finishedDate = new Date();
             }
-        } else if (book.readingStatus === "Want to Read") {
-            // Auto-transition to Currently Reading
+        } else {
             book.readingStatus = "Currently Reading";
+            book.finishedDate = null;
         }
 
         await book.save();
@@ -122,6 +122,7 @@ export async function POST(
                 duration: s.duration,
                 createdAt: s.createdAt,
             })),
+            rating: book.rating ?? 0,
             createdAt: book.createdAt,
         };
 

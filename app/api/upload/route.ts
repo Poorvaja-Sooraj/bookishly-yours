@@ -25,6 +25,7 @@ export async function POST(request: Request) {
                 .upload_stream(
                     {
                         folder: "bookishly-yours/books",
+                        resource_type: "auto",
                     },
                     (error, result) => {
                         if (error) reject(error);
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             success: true,
             imageUrl: result.secure_url,
+            fileUrl: result.secure_url,
         });
     } catch (error) {
         console.error(error);
