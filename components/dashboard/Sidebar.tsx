@@ -33,6 +33,16 @@ export default function Sidebar({
     { label: "Want to Read", href: "/dashboard/want-to-read", icon: Bookmark },
   ];
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      window.location.href = "/auth";
+    }
+  };
+
   const renderContent = (isMobile = false) => (
     <div className="flex flex-col h-full bg-[#2C1D11] text-[#F8F5F2] shadow-2xl justify-between p-4 md:p-5 select-none border-r border-[#3E2C23]/40">
       {/* Top Logo & Brand */}
@@ -73,7 +83,7 @@ export default function Sidebar({
                 key={item.label}
                 href={item.href}
                 onClick={() => isMobile && setMobileOpen?.(false)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium transition-all duration-200 cursor-pointer ${
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E6B89C]/50 ${
                   isActive
                     ? "bg-[#4E3524] text-[#F8F5F2] shadow-md border border-[#6E5440]/30 font-semibold"
                     : "text-[#D4C3B3] hover:bg-[#3E2C23]/80 hover:text-[#F8F5F2]"
@@ -87,11 +97,12 @@ export default function Sidebar({
         </nav>
       </div>
 
-      {/* Bottom Logout Button (UI only) */}
+      {/* Bottom Logout Button */}
       <div className="pt-3 border-t border-[#3E2C23]/60">
         <button
           type="button"
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium text-[#E8A598] hover:bg-[#3E2C23] hover:text-[#FFC4B8] transition-colors cursor-pointer"
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium text-[#E8A598] hover:bg-[#3E2C23] hover:text-[#FFC4B8] transition-colors cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8A598]/50"
         >
           <LogOut className="w-4.5 h-4.5 text-[#E8A598]" />
           <span>Logout</span>

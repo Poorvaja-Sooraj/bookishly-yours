@@ -33,6 +33,18 @@ export default function AddToCapsuleModal({
     }
   }, [isOpen, initialOption]);
 
+  // Handle Escape key press to close modal
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && activeSubModal === null) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, activeSubModal, onClose]);
+
   if (!isOpen) return null;
 
   const handleCapsuleSaved = (capsule: CapsuleItem) => {

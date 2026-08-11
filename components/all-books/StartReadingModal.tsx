@@ -93,6 +93,18 @@ export default function StartReadingModal({
     };
   }, [isOpen]);
 
+  // Handle Escape key press to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !showCloseConfirm && !isCapsuleModalOpen && !finishModalBook) {
+        handleCloseClick();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, showCloseConfirm, isCapsuleModalOpen, finishModalBook]);
+
   // Timer tick
   useEffect(() => {
     if (step === "timer" && !isPaused) {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Star, Trophy, Sparkles, X, ArrowRight } from "lucide-react";
 import { Book } from "./BookCard";
@@ -69,6 +69,18 @@ export default function FinishBookModal({
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [saving, setSaving] = useState(false);
   const [updatedBook, setUpdatedBook] = useState<Book | null>(null);
+
+  // Handle Escape key press to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
