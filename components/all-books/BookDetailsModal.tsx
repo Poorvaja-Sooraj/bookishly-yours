@@ -170,6 +170,18 @@ export default function BookDetailsModal({
     }
   }, [isOpen]);
 
+  // Handle Escape key press to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !startReadingOpen && !showRestartConfirm) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, startReadingOpen, showRestartConfirm, onClose]);
+
   const pagesRead = book.currentPage ?? 0;
   const pagesLeft = Math.max(0, book.totalPages - pagesRead);
   const pct = book.totalPages > 0 ? Math.round((pagesRead / book.totalPages) * 100) : 0;
@@ -244,7 +256,7 @@ export default function BookDetailsModal({
         />
 
         {/* Modal card — scroll is contained inside the card only */}
-        <div className="relative z-10 w-full max-w-3xl bg-[#FAF7F2] rounded-2xl sm:rounded-3xl border border-[#3E2C23]/15 shadow-2xl overflow-hidden animate-fade-in max-h-[90vh] flex flex-col">
+        <div className="relative z-10 w-full max-w-3xl bg-[#FAF7F2] rounded-2xl sm:rounded-3xl border border-[#3E2C23]/15 shadow-2xl overflow-hidden animate-fade-in max-h-[92vh] flex flex-col my-auto">
           {/* Close button */}
           <button
             type="button"
@@ -255,9 +267,9 @@ export default function BookDetailsModal({
             <X className="w-5 h-5" />
           </button>
 
-          <div className="flex flex-col md:flex-row overflow-hidden flex-1 min-h-0">
+          <div className="flex flex-col md:flex-row overflow-y-auto md:overflow-hidden flex-1 min-h-0">
             {/* ── LEFT PANEL ── */}
-            <div className="md:w-[280px] shrink-0 flex flex-col items-center pt-8 pb-6 px-6 border-b md:border-b-0 md:border-r border-[#3E2C23]/10 bg-[#FAF7F2] overflow-y-auto">
+            <div className="md:w-[280px] shrink-0 flex flex-col items-center pt-8 pb-6 px-6 border-b md:border-b-0 md:border-r border-[#3E2C23]/10 bg-[#FAF7F2] md:overflow-y-auto">
               {/* Book Cover */}
               <div className="w-[155px] h-[230px] rounded-xl overflow-hidden shadow-lg mb-5 shrink-0">
                 {book.coverImage ? (
@@ -436,7 +448,7 @@ export default function BookDetailsModal({
             </div>
 
             {/* ── RIGHT PANEL ── */}
-            <div className="flex-1 p-6 space-y-4 overflow-y-auto">
+            <div className="flex-1 p-5 md:p-6 space-y-4 md:overflow-y-auto">
               {/* Reading Progress Card */}
               <div className="bg-[#F5EFE6]/60 rounded-2xl border border-[#3E2C23]/10 p-5">
                 <h3 className="text-lg font-serif font-bold text-[#2C1D11] mb-4">

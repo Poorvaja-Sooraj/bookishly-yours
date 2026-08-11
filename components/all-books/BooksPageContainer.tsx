@@ -72,9 +72,9 @@ export default function BooksPageContainer({
   };
 
   return (
-    <div className="flex-1 flex flex-col space-y-6 select-none">
+    <div className="flex-1 flex flex-col space-y-4 sm:space-y-5 select-none">
       {/* Page Header Section: Title, Real-Time Search Bar, and + Add Book Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-b border-[#3E2C23]/10 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-b border-[#3E2C23]/10 pb-3">
         {/* Page Title */}
         <h2 className="text-2xl md:text-3xl font-serif font-bold text-[#2C1D11]">
           {pageTitle}

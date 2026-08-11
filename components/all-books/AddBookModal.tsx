@@ -88,6 +88,17 @@ export default function AddBookModal({
     };
   }, [isOpen]);
 
+  // Handle Escape key press to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -171,8 +182,11 @@ export default function AddBookModal({
 
       {/* Modal Card Container */}
       <form
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-book-modal-title"
         onSubmit={handleSubmit}
-        className="relative w-full max-w-2xl bg-[#FAF7F2] rounded-2xl sm:rounded-3xl border border-[#3E2C23]/20 shadow-2xl overflow-hidden z-10 animate-fade-in my-auto max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-2xl bg-[#FAF7F2] rounded-2xl sm:rounded-3xl border border-[#3E2C23]/20 shadow-2xl overflow-hidden z-10 animate-fade-in my-auto max-h-[92vh] flex flex-col active:scale-[0.99] transition-transform duration-200"
       >
         {/* Header Section */}
         <div className="relative bg-[#F3EBE0]/80 border-b border-[#3E2C23]/10 px-6 py-5 flex flex-col items-center justify-center text-center shrink-0">
@@ -180,22 +194,27 @@ export default function AddBookModal({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 text-[#3E2C23]/60 hover:text-[#2C1D11] p-1.5 rounded-full hover:bg-[#3E2C23]/10 transition-colors cursor-pointer"
+            className="absolute top-4 right-4 text-[#6E5440]/60 hover:text-[#2C1D11] p-2 rounded-full hover:bg-[#3E2C23]/10 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#3E2C23]/40 focus-visible:outline-none"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {/* Vintage Open Book & Leaves Artwork Illustration */}
-          <div className="flex items-center gap-3 mb-1">
-            <svg className="w-16 h-12 md:w-20 md:h-14" viewBox="0 0 100 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="25" y="10" width="14" height="18" rx="2" fill="#EBE4D8" stroke="#8C6747" strokeWidth="1" />
-              <path d="M32 15C30 18 32 23 32 23M32 15C34 18 32 23 32 23" stroke="#5C3E2B" strokeWidth="1" strokeLinecap="round" />
-              <rect x="43" y="8" width="14" height="18" rx="2" fill="#EBE4D8" stroke="#8C6747" strokeWidth="1" />
-              <path d="M50 12C48 16 50 21 50 21M50 12C52 16 50 21 50 21" stroke="#5C3E2B" strokeWidth="1" strokeLinecap="round" />
-              <path d="M15 50C30 45 48 48 50 52C52 48 70 45 85 50V35C70 30 52 33 50 37C48 33 30 30 15 35V50Z" fill="#FBF9F5" stroke="#8C6747" strokeWidth="1.5" />
-              <path d="M50 37V52" stroke="#8C6747" strokeWidth="1.5" />
-              <path d="M50 37C42 28 30 28 22 34M50 37C58 28 70 28 78 34" stroke="#7A5A3E" strokeWidth="1.5" strokeLinecap="round" />
+          {/* Decorative Top Stamp */}
+          <div className="w-10 h-10 rounded-full bg-[#EBE4D8] border border-[#C4A890]/50 flex items-center justify-center mb-2 shadow-xs">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 100 60"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M50 38C38 38 20 22 8 22C4 22 2 24 2 28C2 38 20 54 50 54C80 54 98 38 98 28C98 24 96 22 92 22C80 22 62 38 50 38Z"
+                fill="#3E2C23"
+                opacity="0.9"
+              />
+              <circle cx="50" cy="18" r="4" fill="#3E2C23" />
               <circle cx="22" cy="34" r="2" fill="#7A5A3E" />
               <circle cx="78" cy="34" r="2" fill="#7A5A3E" />
               <circle cx="34" cy="28" r="1.5" fill="#7A5A3E" />
@@ -203,7 +222,10 @@ export default function AddBookModal({
             </svg>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#2C1D11] tracking-tight">
+          <h2
+            id="add-book-modal-title"
+            className="text-2xl sm:text-3xl font-serif font-bold text-[#2C1D11] tracking-tight"
+          >
             {mode === "edit" ? "Edit Book" : "Add Book"}
           </h2>
           <p className="text-xs sm:text-sm font-sans text-[#6E5440]/80 mt-0.5">

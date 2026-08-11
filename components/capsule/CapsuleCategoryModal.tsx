@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   X,
   Plus,
@@ -64,6 +64,18 @@ export default function CapsuleCategoryModal({
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [audioProgress, setAudioProgress] = useState<Record<string, number>>({});
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
+
+  // Handle Escape key press to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !selectedPhoto && !isAddModalOpen && !editingCapsule) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, selectedPhoto, isAddModalOpen, editingCapsule, onClose]);
 
   if (!isOpen) return null;
 
