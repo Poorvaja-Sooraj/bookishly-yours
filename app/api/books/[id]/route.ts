@@ -25,6 +25,7 @@ function formatBook(book: any) {
             duration: s.duration,
             createdAt: s.createdAt,
         })),
+        rating: book.rating ?? 0,
         createdAt: book.createdAt,
     };
 }

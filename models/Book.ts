@@ -22,6 +22,7 @@ export interface IBook extends Document {
     totalTimeSpent: number; // seconds
     sessionsCount: number;
     sessions: IReadingSession[];
+    rating: number;
 }
 
 const ReadingSessionSchema = new Schema(
@@ -115,6 +116,13 @@ const BookSchema = new Schema(
         sessions: {
             type: [ReadingSessionSchema],
             default: [],
+        },
+
+        rating: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 5,
         },
     },
     {

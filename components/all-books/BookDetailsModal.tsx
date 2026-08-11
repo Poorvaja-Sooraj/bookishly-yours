@@ -12,10 +12,12 @@ import {
   Trash2,
   ChevronDown,
   Play,
+  Star,
 } from "lucide-react";
 import { Book } from "./BookCard";
 import StartReadingModal from "./StartReadingModal";
 import { useBooks } from "@/context/BookContext";
+import ReadersAddedContent from "@/components/capsule/ReadersAddedContent";
 
 interface BookDetailsModalProps {
   isOpen: boolean;
@@ -176,34 +178,26 @@ export default function BookDetailsModal({
   const pagesPerHour = calcPagesPerHour(totalTimeSpent, pagesRead);
   const readingPeriod = calcReadingPeriod(book.startedDate, book.finishedDate);
 
+  const [isRestarting, setIsRestarting] = useState(false);
+
   const handleStartReadingClick = () => {
     if (book.readingStatus === "Completed" || pagesRead >= book.totalPages) {
       setShowRestartConfirm(true);
     } else {
+      setIsRestarting(false);
       setStartReadingOpen(true);
     }
   };
 
-  const handleConfirmRestart = async () => {
+  const handleConfirmRestart = () => {
     setShowRestartConfirm(false);
-    const updatedData: Omit<Book, "id"> = {
-      ...book,
-      currentPage: 0,
-      readingStatus: "Currently Reading",
-      finishedDate: null,
-    };
-    await updateBook(book.id, updatedData);
-    setBook((prev) => ({
-      ...prev,
-      currentPage: 0,
-      readingStatus: "Currently Reading",
-      finishedDate: null,
-    }));
+    setIsRestarting(true);
     setStartReadingOpen(true);
   };
 
   const handleCancelRestart = () => {
     setShowRestartConfirm(false);
+    setIsRestarting(false);
   };
 
   const handleSessionSaved = useCallback(
@@ -308,6 +302,32 @@ export default function BookDetailsModal({
                   </span>
                 ))}
               </div>
+
+              {/* Star rating — only visible after user has submitted a rating */}
+              {(book.rating ?? 0) > 0 && (
+                <div className="flex items-center gap-1 mb-5">
+                  {[1, 2, 3, 4, 5].map((s) => {
+                    const r = book.rating ?? 0;
+                    if (s <= Math.floor(r)) {
+                      return <Star key={s} className="w-4 h-4 fill-[#F5A623] text-[#F5A623]" />;
+                    }
+                    if (s === Math.ceil(r) && r % 1 !== 0) {
+                      return (
+                        <span key={s} className="relative w-4 h-4 inline-block">
+                          <Star className="w-4 h-4 text-[#D5C9B8] absolute inset-0" />
+                          <span className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
+                            <Star className="w-4 h-4 fill-[#F5A623] text-[#F5A623]" />
+                          </span>
+                        </span>
+                      );
+                    }
+                    return <Star key={s} className="w-4 h-4 text-[#D5C9B8]" />;
+                  })}
+                  <span className="text-xs font-sans font-bold text-[#2C1D11] ml-1">
+                    {book.rating}/5
+                  </span>
+                </div>
+              )}
 
               {/* Start Reading button */}
               <button
@@ -462,6 +482,9 @@ export default function BookDetailsModal({
                 </p>
               </div>
 
+              {/* Reader's Added Content Section */}
+              <ReadersAddedContent bookId={book.id} />
+
               {/* Reading Statistics Card */}
               <div className="bg-[#F5EFE6]/60 rounded-2xl border border-[#3E2C23]/10 p-5">
                 <h3 className="text-lg font-serif font-bold text-[#2C1D11] mb-4">
@@ -610,8 +633,12 @@ export default function BookDetailsModal({
       {/* Start Reading multi-step modal (stacks above the details modal) */}
       <StartReadingModal
         isOpen={startReadingOpen}
-        onClose={() => setStartReadingOpen(false)}
+        onClose={() => {
+          setStartReadingOpen(false);
+          setIsRestarting(false);
+        }}
         book={book}
+        isRestarting={isRestarting}
         onSessionSaved={handleSessionSaved}
       />
     </>

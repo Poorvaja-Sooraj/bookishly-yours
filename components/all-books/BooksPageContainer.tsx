@@ -53,7 +53,7 @@ export default function BooksPageContainer({
     return books.filter((b) => b.readingStatus === filterStatus);
   }, [books, filterStatus]);
 
-  // 2. Real-time case-insensitive search by Book Name & Author Name from first character typed
+  // 2. Real-time case-insensitive search by Book Name, Author Name & Genre from first character typed
   const filteredBooks = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return categoryBooks;
@@ -61,7 +61,8 @@ export default function BooksPageContainer({
     return categoryBooks.filter(
       (book) =>
         book.title.toLowerCase().includes(query) ||
-        book.author.toLowerCase().includes(query)
+        book.author.toLowerCase().includes(query) ||
+        (book.genre && book.genre.toLowerCase().includes(query))
     );
   }, [categoryBooks, searchQuery]);
 
@@ -90,7 +91,7 @@ export default function BooksPageContainer({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search books or authors..."
+              placeholder="Search books, authors, or genres..."
               className="w-full h-10 pl-9 pr-4 bg-[#FAF7F2] border border-[#3E2C23]/20 rounded-xl text-xs sm:text-sm font-sans text-[#2C1D11] placeholder:text-[#6E5440]/60 focus:outline-none focus:ring-2 focus:ring-[#4E3524]/20 focus:border-[#4E3524] transition-all shadow-xs"
             />
             {searchQuery && (
@@ -143,7 +144,7 @@ export default function BooksPageContainer({
           </h3>
           <p className="text-sm font-sans text-[#6E5440]/80 mt-1 max-w-sm">
             {searchQuery
-              ? "Try searching with a different book title or author name."
+              ? "Try searching with a different book title, author name, or genre."
               : "Click the Add Book button above to add a new book."}
           </p>
         </div>
