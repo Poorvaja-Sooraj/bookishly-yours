@@ -4,14 +4,42 @@ import connectDB from "@/lib/mongodb";
 import Book from "@/models/Book";
 import { verifyToken } from "@/lib/jwt";
 
-function formatBook(book: any) {
+interface BookSession {
+  startPage: number;
+  endPage: number;
+  duration: number;
+  createdAt?: Date;
+}
+
+interface BookData {
+  _id: {
+    toString(): string;
+  };
+  title: string;
+  author: string;
+  coverImage?: string;
+  genre?: string;
+  readingStatus: string;
+  totalPages: number;
+  currentPage: number;
+  language?: string;
+  startedDate?: Date | null;
+  finishedDate?: Date | null;
+  totalTimeSpent?: number;
+  sessionsCount?: number;
+  sessions?: BookSession[];
+  rating?: number;
+  createdAt?: Date;
+}
+
+function formatBook(book: BookData) {
   return {
     id: book._id.toString(), title: book.title, author: book.author, coverImage: book.coverImage,
     genre: book.genre, readingStatus: book.readingStatus, totalPages: book.totalPages,
     currentPage: book.currentPage, language: book.language ?? "English",
     startedDate: book.startedDate ?? null, finishedDate: book.finishedDate ?? null,
     totalTimeSpent: book.totalTimeSpent ?? 0, sessionsCount: book.sessionsCount ?? 0,
-    sessions: (book.sessions ?? []).map((s: any) => ({ startPage: s.startPage, endPage: s.endPage, duration: s.duration, createdAt: s.createdAt })),
+    sessions: (book.sessions ?? []).map((s) => ({ startPage: s.startPage, endPage: s.endPage, duration: s.duration, createdAt: s.createdAt })),
     rating: book.rating ?? 0, createdAt: book.createdAt,
   };
 }

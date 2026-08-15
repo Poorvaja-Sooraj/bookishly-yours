@@ -29,6 +29,7 @@ export default function AddToCapsuleModal({
   // Sync initialOption if passed directly
   React.useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveSubModal(initialOption);
     }
   }, [isOpen, initialOption]);

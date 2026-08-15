@@ -6,7 +6,6 @@ import WheelPicker from "@/components/common/WheelPicker";
 import { useBooks } from "@/context/BookContext";
 import { Book } from "./BookCard";
 import AddToCapsuleModal from "@/components/capsule/AddToCapsuleModal";
-
 import FinishBookModal from "@/components/all-books/FinishBookModal";
 
 type Step = "start-page" | "timer" | "end-page";
@@ -60,6 +59,7 @@ export default function StartReadingModal({
   const prevIsOpenRef = useRef(false);
 
   // Reset when modal transitions from closed to open
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen && !prevIsOpenRef.current) {
       setElapsed(0);
@@ -80,6 +80,7 @@ export default function StartReadingModal({
         setStep("timer");
       }
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
     prevIsOpenRef.current = isOpen;
   }, [isOpen, book.currentPage, book.totalPages, isRestarting]);
 
@@ -93,6 +94,17 @@ export default function StartReadingModal({
     };
   }, [isOpen]);
 
+  // Triggered when user clicks Close (X) button or backdrop
+  const handleCloseClick = useCallback(() => {
+    if (step === "start-page") {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      onClose();
+    } else {
+      setIsPaused(true);
+      setShowCloseConfirm(true);
+    }
+  }, [step, onClose]);
+
   // Handle Escape key press to close modal
   useEffect(() => {
     if (!isOpen) return;
@@ -103,7 +115,7 @@ export default function StartReadingModal({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, showCloseConfirm, isCapsuleModalOpen, finishModalBook]);
+  }, [isOpen, showCloseConfirm, isCapsuleModalOpen, finishModalBook, handleCloseClick]);
 
   // Timer tick
   useEffect(() => {
@@ -177,17 +189,6 @@ export default function StartReadingModal({
       onClose();
     } finally {
       setSaving(false);
-    }
-  };
-
-  // Triggered when user clicks Close (X) button or backdrop
-  const handleCloseClick = () => {
-    if (step === "start-page") {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      onClose();
-    } else {
-      setIsPaused(true);
-      setShowCloseConfirm(true);
     }
   };
 
@@ -369,8 +370,8 @@ export default function StartReadingModal({
                 {saving
                   ? "Saving..."
                   : endPage >= book.totalPages
-                  ? "Finish Book 🎉"
-                  : "Save Session"}
+                    ? "Finish Book 🎉"
+                    : "Save Session"}
               </button>
             </div>
           )}

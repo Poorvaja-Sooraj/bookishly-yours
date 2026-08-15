@@ -37,6 +37,7 @@ export default function AddCardModal({
   const isEditing = !!editCapsule;
 
   // Pre-fill when editing
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen && editCapsule) {
       setContent(editCapsule.content || "");
@@ -48,6 +49,7 @@ export default function AddCardModal({
       setError("");
     }
   }, [isOpen, editCapsule]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Handle Escape key press to close modal
   useEffect(() => {
@@ -161,9 +163,8 @@ export default function AddCardModal({
             onChange={(e) => setContent(e.target.value.slice(0, 1000))}
             placeholder="Write something..."
             rows={5}
-            className={`w-full bg-transparent resize-none border-none outline-none text-sm text-[#2C1D11] placeholder:text-[#6E5440]/50 ${
-              isSerif ? "font-serif" : "font-sans"
-            }`}
+            className={`w-full bg-transparent resize-none border-none outline-none text-sm text-[#2C1D11] placeholder:text-[#6E5440]/50 ${isSerif ? "font-serif" : "font-sans"
+              }`}
           />
           <div className="text-right text-[11px] font-sans text-[#6E5440]/60 select-none">
             {content.length} / 1000
@@ -182,11 +183,10 @@ export default function AddCardModal({
           <button
             type="button"
             onClick={() => setIsSerif((p) => !p)}
-            className={`flex items-center justify-center px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer transition-colors ${
-              isSerif
-                ? "bg-[#3E2C23] text-[#FAF7F2] border-[#3E2C23]"
-                : "bg-[#FAF7F2] text-[#3E2C23] border-[#3E2C23]/20"
-            }`}
+            className={`flex items-center justify-center px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer transition-colors ${isSerif
+              ? "bg-[#3E2C23] text-[#FAF7F2] border-[#3E2C23]"
+              : "bg-[#FAF7F2] text-[#3E2C23] border-[#3E2C23]/20"
+              }`}
             title="Toggle Font (Serif / Sans)"
           >
             <TypeIcon className="w-3.5 h-3.5 mr-1" />
@@ -202,11 +202,10 @@ export default function AddCardModal({
                   key={c.id}
                   type="button"
                   onClick={() => setSelectedColor(c.hex)}
-                  className={`w-6 h-6 rounded-full cursor-pointer transition-all ${
-                    isSelected
-                      ? "ring-2 ring-[#3E2C23] ring-offset-2 scale-110"
-                      : "hover:scale-105"
-                  }`}
+                  className={`w-6 h-6 rounded-full cursor-pointer transition-all ${isSelected
+                    ? "ring-2 ring-[#3E2C23] ring-offset-2 scale-110"
+                    : "hover:scale-105"
+                    }`}
                   style={{
                     backgroundColor: c.hex,
                     border: `1.5px solid ${c.border}`,

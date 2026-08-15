@@ -152,9 +152,11 @@ export default function BookDetailsModal({
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
   // Sync local state if parent changes (e.g., edit saves or session recorded)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setBook(initialBook);
   }, [initialBook]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Lock body & html scroll completely while this modal is open
   useEffect(() => {

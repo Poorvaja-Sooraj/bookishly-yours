@@ -6,6 +6,7 @@ import React, {
   useState,
   useMemo,
   useEffect,
+  useCallback,
 } from "react";
 import { Book } from "@/components/all-books/BookCard";
 
@@ -43,7 +44,7 @@ export function BookProvider({ children }: { children: React.ReactNode }) {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -58,11 +59,12 @@ export function BookProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchBooks();
-  }, []);
+  }, [fetchBooks]);
 
   const deleteBook = async (id: string) => {
     try {

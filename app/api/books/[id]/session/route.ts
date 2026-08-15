@@ -116,7 +116,12 @@ export async function POST(
             finishedDate: book.finishedDate ?? null,
             totalTimeSpent: book.totalTimeSpent ?? 0,
             sessionsCount: book.sessionsCount ?? 0,
-            sessions: (book.sessions ?? []).map((s: any) => ({
+            sessions: (book.sessions ?? []).map((s: {
+                startPage: number;
+                endPage: number;
+                duration: number;
+                createdAt: Date;
+            }) => ({
                 startPage: s.startPage,
                 endPage: s.endPage,
                 duration: s.duration,

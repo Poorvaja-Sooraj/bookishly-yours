@@ -176,9 +176,13 @@ export default function AddVoiceModal({
       } else {
         setError(data.message || "Failed to save voice capsule.");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message || "An error occurred while uploading audio.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An error occurred while uploading audio."
+      );
     } finally {
       setSaving(false);
     }
@@ -226,19 +230,18 @@ export default function AddVoiceModal({
             (height, i) => (
               <span
                 key={i}
-                className={`w-1 rounded-full transition-all duration-300 ${
-                  isRecording
+                className={`w-1 rounded-full transition-all duration-300 ${isRecording
                     ? "bg-[#3E2C23] animate-pulse"
                     : audioBlob
-                    ? "bg-[#6E5440]"
-                    : "bg-[#C4A890]/40"
-                }`}
+                      ? "bg-[#6E5440]"
+                      : "bg-[#C4A890]/40"
+                  }`}
                 style={{
                   height: isRecording
                     ? `${Math.max(15, (height * (i % 2 === 0 ? 1 : 0.7)))}%`
                     : audioBlob
-                    ? `${height * 0.5}%`
-                    : "20%",
+                      ? `${height * 0.5}%`
+                      : "20%",
                   animationDelay: `${i * 0.05}s`,
                 }}
               />
@@ -256,8 +259,8 @@ export default function AddVoiceModal({
           {isRecording
             ? "Recording... Tap the button to stop"
             : audioBlob
-            ? "Recording saved! Preview below or tap mic to re-record."
-            : "Tap the mic to start recording"}
+              ? "Recording saved! Preview below or tap mic to re-record."
+              : "Tap the mic to start recording"}
         </p>
 
         {/* Big Mic Button */}
@@ -265,11 +268,10 @@ export default function AddVoiceModal({
           <button
             type="button"
             onClick={handleMicClick}
-            className={`relative w-16 h-16 rounded-full flex items-center justify-center text-[#FAF7F2] transition-all cursor-pointer shadow-lg ${
-              isRecording
+            className={`relative w-16 h-16 rounded-full flex items-center justify-center text-[#FAF7F2] transition-all cursor-pointer shadow-lg ${isRecording
                 ? "bg-[#A93226] hover:bg-[#8B1F19] scale-105"
                 : "bg-[#3E2C23] hover:bg-[#2C1D11]"
-            }`}
+              }`}
             title={isRecording ? "Stop Recording" : "Start Recording"}
           >
             {isRecording ? (

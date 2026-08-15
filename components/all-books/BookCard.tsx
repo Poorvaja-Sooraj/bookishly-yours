@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { MoreVertical, Trash2, Star, StarHalf } from "lucide-react";
+import { MoreVertical, Trash2, Star } from "lucide-react";
 import { useBooks } from "@/context/BookContext";
 
 export interface ReadingSession {

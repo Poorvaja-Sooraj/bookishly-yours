@@ -1,12 +1,28 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import connectDB from "@/lib/mongodb";
 import Capsule from "@/models/Capsule";
 import Book from "@/models/Book";
 import { verifyToken } from "@/lib/jwt";
 
-function formatCapsule(capsule: any) {
+interface CapsuleData {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  bookId: Types.ObjectId;
+  sessionId?: Types.ObjectId | null;
+  type: "text" | "voice" | "photo";
+  content?: string;
+  color?: string;
+  audioUrl?: string;
+  audioDuration?: number;
+  imageUrl?: string;
+  caption?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+function formatCapsule(capsule: CapsuleData) {
   return {
     id: capsule._id.toString(),
     userId: capsule.userId.toString(),
