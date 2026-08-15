@@ -3,18 +3,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { X, Mic, Square, Play, Pause, RotateCcw } from "lucide-react";
 import { CapsuleItem } from "./types";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { formatDuration } from "@/lib/format-utils";
 
 interface AddVoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   bookId: string;
   onSaved: (capsule: CapsuleItem) => void;
-}
-
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
 export default function AddVoiceModal({
@@ -44,17 +40,7 @@ export default function AddVoiceModal({
     };
   }, [audioUrl]);
 
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  useEscapeKey(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -251,7 +237,7 @@ export default function AddVoiceModal({
 
         {/* Digital Timer */}
         <div className="text-center mb-2 font-mono text-3xl font-bold text-[#2C1D11] tracking-wider">
-          {formatDuration(recordingTime)}
+          {formatDuration(recordingTime, "mmss")}
         </div>
 
         {/* Status Subtitle */}
@@ -311,7 +297,7 @@ export default function AddVoiceModal({
                   Voice Preview
                 </p>
                 <p className="text-[10px] font-sans text-[#6E5440]/70">
-                  Duration: {formatDuration(recordingTime)}
+                  Duration: {formatDuration(recordingTime, "mmss")}
                 </p>
               </div>
             </div>

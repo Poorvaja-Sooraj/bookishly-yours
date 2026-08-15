@@ -12,7 +12,9 @@ import {
   Library,
 } from "lucide-react";
 import { useBooks } from "@/context/BookContext";
-import { Book } from "./BookCard";
+import { useScrollLock } from "@/lib/hooks/useScrollLock";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { Book } from "@/lib/types/book";
 import Image from "next/image";
 
 interface AddBookModalProps {
@@ -83,27 +85,8 @@ export default function AddBookModal({
   }, [selectedFile, mode, book]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Lock body scroll while modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  useScrollLock(isOpen);
+  useEscapeKey(isOpen, onClose);
 
   if (!isOpen) return null;
 

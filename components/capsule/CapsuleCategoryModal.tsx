@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   X,
   Plus,
@@ -18,6 +18,7 @@ import Image from "next/image";
 import { CapsuleItem, CapsuleType } from "./types";
 import AddToCapsuleModal from "./AddToCapsuleModal";
 import AddCardModal from "./AddCardModal";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface CapsuleCategoryModalProps {
   isOpen: boolean;
@@ -30,21 +31,7 @@ interface CapsuleCategoryModalProps {
   onCapsuleUpdated?: (capsule: CapsuleItem) => void;
 }
 
-function formatDate(date: string | Date): string {
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
+import { formatDate, formatDuration } from "@/lib/format-utils";
 
 export default function CapsuleCategoryModal({
   isOpen,
@@ -65,17 +52,10 @@ export default function CapsuleCategoryModal({
   const [audioProgress, setAudioProgress] = useState<Record<string, number>>({});
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
 
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !selectedPhoto && !isAddModalOpen && !editingCapsule) {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, selectedPhoto, isAddModalOpen, editingCapsule, onClose]);
+  useEscapeKey(
+    isOpen && !selectedPhoto && !isAddModalOpen && !editingCapsule,
+    onClose
+  );
 
   if (!isOpen) return null;
 
@@ -274,7 +254,7 @@ export default function CapsuleCategoryModal({
                             Voice Note
                           </span>
                           <span className="text-xs font-mono font-medium text-[#6E5440]">
-                            {formatDuration(item.audioDuration || 0)}
+                            {formatDuration(item.audioDuration || 0, "mmss")}
                           </span>
                         </div>
                         <div className="w-full h-2 bg-[#EBE4D8] rounded-full overflow-hidden mb-1.5">

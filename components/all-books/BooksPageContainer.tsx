@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Plus, Search, BookOpen } from "lucide-react";
 import BookGrid from "./BookGrid";
-import { Book } from "./BookCard";
+import { useScrollLock } from "@/lib/hooks/useScrollLock";
+import { Book } from "@/lib/types/book";
 import AddBookModal from "./AddBookModal";
 import BookDetailsModal from "./BookDetailsModal";
 import { useBooks } from "@/context/BookContext";
@@ -34,18 +35,7 @@ export default function BooksPageContainer({
     [books, selectedBookId]
   );
 
-  // Lock body scroll whenever any modal is open
-  useEffect(() => {
-    const anyOpen = isAddBookOpen || isDetailsOpen;
-    if (anyOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isAddBookOpen, isDetailsOpen]);
+  useScrollLock(isAddBookOpen || isDetailsOpen);
 
   // 1. Filter books by category status if provided
   const categoryBooks = useMemo(() => {

@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Star, Trophy, Sparkles, X, ArrowRight } from "lucide-react";
-import { Book } from "./BookCard";
+import { Book } from "@/lib/types/book";
 import { useBooks } from "@/context/BookContext";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface FinishBookModalProps {
   isOpen: boolean;
@@ -13,49 +14,8 @@ interface FinishBookModalProps {
   onFinished?: (updatedBook: Book) => void;
 }
 
-function formatDuration(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
-
-function formatDate(date: string | Date | null | undefined): string {
-  if (!date) return "N/A";
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return "N/A";
-  return d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-/**
- * Renders a row of stars that correctly displays full, half, and empty states.
- */
-function StarDisplay({ rating, size = "w-4 h-4" }: { rating: number; size?: string }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((s) => {
-        if (s <= Math.floor(rating)) {
-          return <Star key={s} className={`${size} fill-[#F5A623] text-[#F5A623]`} />;
-        }
-        if (s === Math.ceil(rating) && rating % 1 !== 0) {
-          return (
-            <span key={s} className={`relative ${size} inline-block`}>
-              <Star className={`${size} text-[#D5C9B8] absolute inset-0`} />
-              <span className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
-                <Star className={`${size} fill-[#F5A623] text-[#F5A623]`} />
-              </span>
-            </span>
-          );
-        }
-        return <Star key={s} className={`${size} text-[#D5C9B8]`} />;
-      })}
-    </div>
-  );
-}
+import { formatDate, formatDuration } from "@/lib/format-utils";
+import StarDisplay from "@/components/common/StarDisplay";
 
 export default function FinishBookModal({
   isOpen,
@@ -70,17 +30,7 @@ export default function FinishBookModal({
   const [saving, setSaving] = useState(false);
   const [updatedBook, setUpdatedBook] = useState<Book | null>(null);
 
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  useEscapeKey(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -257,9 +207,9 @@ export default function FinishBookModal({
 
                 {/* Rating stars display — supports half stars */}
                 <div className="flex items-center gap-1">
-                  <StarDisplay rating={displayBook.rating || rating} size="w-4 h-4" />
-                  <span className="text-xs font-sans font-bold text-[#2C1D11] ml-1">
-                    {displayBook.rating || rating}/5
+                  <StarDisplay rating={displayBook.rating || rating} size="w-4 h-4" showNumeric numericSize="text-xs" />
+                  <span className="text-xs font-sans font-bold text-[#2C1D11]">
+                    /5
                   </span>
                 </div>
               </div>
@@ -289,7 +239,7 @@ export default function FinishBookModal({
 
             {/* Date Range */}
             <p className="text-xs font-sans text-[#6E5440]/80 mb-5 bg-[#F5EFE6]/60 py-2 px-3 rounded-xl border border-[#3E2C23]/10 inline-block">
-              📅 Read from <span className="font-semibold text-[#2C1D11]">{formatDate(displayBook.startedDate)}</span> to <span className="font-semibold text-[#2C1D11]">{formatDate(displayBook.finishedDate || new Date())}</span>
+              📅 Read from <span className="font-semibold text-[#2C1D11]">{formatDate(displayBook.startedDate, "N/A")}</span> to <span className="font-semibold text-[#2C1D11]">{formatDate(displayBook.finishedDate || new Date(), "N/A")}</span>
             </p>
 
             <button

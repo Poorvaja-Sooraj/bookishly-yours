@@ -6,6 +6,7 @@ import AddCardModal from "./AddCardModal";
 import AddVoiceModal from "./AddVoiceModal";
 import AddPhotosModal from "./AddPhotosModal";
 import { CapsuleItem } from "./types";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface AddToCapsuleModalProps {
   isOpen: boolean;
@@ -34,17 +35,7 @@ export default function AddToCapsuleModal({
     }
   }, [isOpen, initialOption]);
 
-  // Handle Escape key press to close modal
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && activeSubModal === null) {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, activeSubModal, onClose]);
+  useEscapeKey(isOpen && activeSubModal === null, onClose);
 
   if (!isOpen) return null;
 

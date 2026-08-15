@@ -8,7 +8,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { Book } from "@/components/all-books/BookCard";
+import { Book } from "@/lib/types/book";
 
 interface RecordSessionData {
   startPage: number;
@@ -66,7 +66,7 @@ export function BookProvider({ children }: { children: React.ReactNode }) {
     fetchBooks();
   }, [fetchBooks]);
 
-  const deleteBook = async (id: string) => {
+  const deleteBook = useCallback(async (id: string) => {
     try {
       const response = await fetch(`/api/books/${id}`, {
         method: "DELETE",
@@ -75,14 +75,14 @@ export function BookProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (data.success) {
-        await fetchBooks();
+        setBooks((prev) => prev.filter((b) => b.id !== id));
       }
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
-  const updateBook = async (
+  const updateBook = useCallback(async (
     id: string,
     updatedBook: Omit<Book, "id">
   ) => {
@@ -98,16 +98,16 @@ export function BookProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (data.success) {
-        await fetchBooks();
+        setBooks((prev) => prev.map((b) => (b.id === id ? data.book : b)));
       } else {
         console.error(data.message);
       }
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
-  const addBook = async (newBookData: Omit<Book, "id">) => {
+  const addBook = useCallback(async (newBookData: Omit<Book, "id">) => {
     try {
       const response = await fetch("/api/books", {
         method: "POST",
@@ -120,16 +120,16 @@ export function BookProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (data.success) {
-        await fetchBooks();
+        setBooks((prev) => [data.book, ...prev]);
       } else {
         console.error(data.message);
       }
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
-  const recordSession = async (
+  const recordSession = useCallback(async (
     bookId: string,
     sessionData: RecordSessionData
   ): Promise<Book | void> => {
@@ -145,9 +145,9 @@ export function BookProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (data.success) {
-        // Refresh global book list
-        await fetchBooks();
-        // Return updated book for immediate local state sync
+        setBooks((prev) =>
+          prev.map((b) => (b.id === bookId ? data.book : b))
+        );
         return data.book as Book;
       } else {
         console.error(data.message);
@@ -155,7 +155,7 @@ export function BookProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
   const stats = useMemo(() => {
     const total = books.length;
@@ -168,19 +168,31 @@ export function BookProvider({ children }: { children: React.ReactNode }) {
     return { total, completed, currentlyReading, wantToRead };
   }, [books]);
 
+  const value = useMemo(
+    () => ({
+      books,
+      loading,
+      fetchBooks,
+      addBook,
+      deleteBook,
+      updateBook,
+      recordSession,
+      stats,
+    }),
+    [
+      books,
+      loading,
+      fetchBooks,
+      addBook,
+      deleteBook,
+      updateBook,
+      recordSession,
+      stats,
+    ]
+  );
+
   return (
-    <BookContext.Provider
-      value={{
-        books,
-        loading,
-        fetchBooks,
-        addBook,
-        deleteBook,
-        updateBook,
-        recordSession,
-        stats,
-      }}
-    >
+    <BookContext.Provider value={value}>
       {children}
     </BookContext.Provider>
   );

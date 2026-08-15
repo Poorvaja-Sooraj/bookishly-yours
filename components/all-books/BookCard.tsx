@@ -2,41 +2,12 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { MoreVertical, Trash2, Star } from "lucide-react";
+import { MoreVertical, Trash2 } from "lucide-react";
 import { useBooks } from "@/context/BookContext";
+import StarDisplay from "@/components/common/StarDisplay";
 
-export interface ReadingSession {
-  startPage: number;
-  endPage: number;
-  duration: number; // seconds
-  createdAt: string | Date;
-}
-
-export interface Book {
-  id: string;
-  title: string;
-  author: string;
-  coverImage?: string;
-  genre: string;
-  readingStatus: "Completed" | "Currently Reading" | "Want to Read";
-  totalPages: number;
-  currentPage: number;
-
-  // Extended reading tracking fields
-  language?: string;
-  startedDate?: string | Date | null;
-  finishedDate?: string | Date | null;
-  totalTimeSpent?: number; // seconds
-  sessionsCount?: number;
-  sessions?: ReadingSession[];
-  rating?: number;
-  createdAt?: string | Date;
-
-  // UI-only fields
-  coverBg?: string;
-  coverTextColor?: string;
-  coverAccentColor?: string;
-}
+import { Book, ReadingSession } from "@/lib/types/book";
+export type { Book, ReadingSession };
 
 interface BookCardProps {
   book: Book;
@@ -188,27 +159,13 @@ export default function BookCard({
         </p>
         {/* Star rating — only shown after user has submitted a rating */}
         {(book.rating ?? 0) > 0 && (
-          <div className="flex items-center gap-0.5 mt-1">
-            {[1, 2, 3, 4, 5].map((s) => {
-              const r = book.rating ?? 0;
-              if (s <= Math.floor(r)) {
-                return <Star key={s} className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />;
-              }
-              if (s === Math.ceil(r) && r % 1 !== 0) {
-                return (
-                  <span key={s} className="relative w-3.5 h-3.5 inline-block">
-                    <Star className="w-3.5 h-3.5 text-[#D5C9B8] absolute inset-0" />
-                    <span className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
-                      <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
-                    </span>
-                  </span>
-                );
-              }
-              return <Star key={s} className="w-3.5 h-3.5 text-[#D5C9B8]" />;
-            })}
-            <span className="text-[10px] font-sans font-bold text-[#2C1D11] ml-0.5">
-              {book.rating}
-            </span>
+          <div className="mt-1">
+            <StarDisplay
+              rating={book.rating ?? 0}
+              size="w-3.5 h-3.5"
+              showNumeric
+              numericSize="text-[10px]"
+            />
           </div>
         )}
       </div>

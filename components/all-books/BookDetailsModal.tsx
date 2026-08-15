@@ -12,12 +12,15 @@ import {
   Trash2,
   ChevronDown,
   Play,
-  Star,
 } from "lucide-react";
-import { Book } from "./BookCard";
+import { Book } from "@/lib/types/book";
 import StartReadingModal from "./StartReadingModal";
 import { useBooks } from "@/context/BookContext";
+import { useScrollLock } from "@/lib/hooks/useScrollLock";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 import ReadersAddedContent from "@/components/capsule/ReadersAddedContent";
+import StarDisplay from "@/components/common/StarDisplay";
+import RestartConfirmDialog from "./RestartConfirmDialog";
 
 interface BookDetailsModalProps {
   isOpen: boolean;
@@ -25,27 +28,8 @@ interface BookDetailsModalProps {
   book: Book;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatDate(date: string | Date | null | undefined): string {
-  if (!date) return "—";
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatDuration(totalSeconds: number): string {
-  if (!totalSeconds || totalSeconds === 0) return "0m";
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  if (h === 0) return `${m}m`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}m`;
-}
+import { formatDate, formatDuration } from "@/lib/format-utils";
+import { ReadingStatus } from "@/lib/types/book";
 
 function calcPagesPerHour(
   totalTimeSpent: number,
@@ -79,13 +63,70 @@ function getProgressMessage(pct: number): string {
 }
 
 const STATUS_OPTIONS = ["Want to Read", "Currently Reading", "Completed"] as const;
-type ReadingStatus = (typeof STATUS_OPTIONS)[number];
 
 const STATUS_DOT_COLOR: Record<ReadingStatus, string> = {
   "Want to Read": "#C4A890",
   "Currently Reading": "#4E8C6F",
   "Completed": "#4E3524",
 };
+
+// ─── Extraction Helpers ────────────────────────────────────────────────────────
+
+function BookMetaRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="flex items-center gap-1.5 text-[#6E5440]/70">
+        {icon} {label}
+      </span>
+      <span className="text-[#2C1D11] font-medium">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function StatCard({ icon, value, label }: { icon: React.ReactNode; value: React.ReactNode; label: string }) {
+  return (
+    <div className="bg-[#FAF7F2] rounded-xl border border-[#3E2C23]/10 p-3 text-center">
+      <div className="flex items-center justify-center gap-1 text-[#4E3524] mb-1">
+        {icon}
+      </div>
+      <p className="text-base font-serif font-bold text-[#2C1D11]">
+        {value}
+      </p>
+      <p className="text-[10px] font-sans text-[#6E5440]/70 mt-0.5">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+interface DateFieldProps {
+  label: string;
+  value: React.ReactNode;
+  hint?: string;
+}
+
+function DateField({ label, value, hint }: DateFieldProps) {
+  return (
+    <div>
+      <p className="text-sm font-serif font-semibold text-[#2C1D11] mb-2">
+        {label}
+      </p>
+      <div className="flex items-center gap-1.5 text-[#2C1D11]">
+        <Calendar className="w-4 h-4 text-[#6E5440]/70" />
+        <span className="text-sm font-sans">
+          {value}
+        </span>
+      </div>
+      {hint && (
+        <p className="text-[11px] font-sans text-[#6E5440]/60 mt-0.5">
+          {hint}
+        </p>
+      )}
+    </div>
+  );
+}
 
 // ─── Circular Progress SVG ────────────────────────────────────────────────────
 
@@ -158,31 +199,8 @@ export default function BookDetailsModal({
   }, [initialBook]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Lock body & html scroll completely while this modal is open
-  useEffect(() => {
-    if (isOpen) {
-      const prevBodyOverflow = document.body.style.overflow;
-      const prevHtmlOverflow = document.documentElement.style.overflow;
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prevBodyOverflow;
-        document.documentElement.style.overflow = prevHtmlOverflow;
-      };
-    }
-  }, [isOpen]);
-
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !startReadingOpen && !showRestartConfirm) {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, startReadingOpen, showRestartConfirm, onClose]);
+  useScrollLock(isOpen, true);
+  useEscapeKey(isOpen && !startReadingOpen && !showRestartConfirm, onClose);
 
   const pagesRead = book.currentPage ?? 0;
   const pagesLeft = Math.max(0, book.totalPages - pagesRead);
@@ -320,25 +338,14 @@ export default function BookDetailsModal({
               {/* Star rating — only visible after user has submitted a rating */}
               {(book.rating ?? 0) > 0 && (
                 <div className="flex items-center gap-1 mb-5">
-                  {[1, 2, 3, 4, 5].map((s) => {
-                    const r = book.rating ?? 0;
-                    if (s <= Math.floor(r)) {
-                      return <Star key={s} className="w-4 h-4 fill-[#F5A623] text-[#F5A623]" />;
-                    }
-                    if (s === Math.ceil(r) && r % 1 !== 0) {
-                      return (
-                        <span key={s} className="relative w-4 h-4 inline-block">
-                          <Star className="w-4 h-4 text-[#D5C9B8] absolute inset-0" />
-                          <span className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
-                            <Star className="w-4 h-4 fill-[#F5A623] text-[#F5A623]" />
-                          </span>
-                        </span>
-                      );
-                    }
-                    return <Star key={s} className="w-4 h-4 text-[#D5C9B8]" />;
-                  })}
-                  <span className="text-xs font-sans font-bold text-[#2C1D11] ml-1">
-                    {book.rating}/5
+                  <StarDisplay
+                    rating={book.rating ?? 0}
+                    size="w-4 h-4"
+                    showNumeric
+                    numericSize="text-xs"
+                  />
+                  <span className="text-xs font-sans font-bold text-[#2C1D11]">
+                    /5
                   </span>
                 </div>
               )}
@@ -408,34 +415,25 @@ export default function BookDetailsModal({
                 </div>
 
                 {/* Added on */}
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-[#6E5440]/70">
-                    <Calendar className="w-3.5 h-3.5" /> Added on
-                  </span>
-                  <span className="text-[#2C1D11] font-medium">
-                    {formatDate(book.createdAt)}
-                  </span>
-                </div>
+                <BookMetaRow
+                  icon={<Calendar className="w-3.5 h-3.5" />}
+                  label="Added on"
+                  value={formatDate(book.createdAt)}
+                />
 
                 {/* Pages */}
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-[#6E5440]/70">
-                    <BookOpen className="w-3.5 h-3.5" /> Pages
-                  </span>
-                  <span className="text-[#2C1D11] font-medium">
-                    {book.totalPages} pages.
-                  </span>
-                </div>
+                <BookMetaRow
+                  icon={<BookOpen className="w-3.5 h-3.5" />}
+                  label="Pages"
+                  value={`${book.totalPages} pages.`}
+                />
 
                 {/* Language */}
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-[#6E5440]/70">
-                    <Globe className="w-3.5 h-3.5" /> Language
-                  </span>
-                  <span className="text-[#2C1D11] font-medium">
-                    {book.language ?? "English"}
-                  </span>
-                </div>
+                <BookMetaRow
+                  icon={<Globe className="w-3.5 h-3.5" />}
+                  label="Language"
+                  value={book.language ?? "English"}
+                />
               </div>
 
               {/* Remove from shelf */}
@@ -507,56 +505,32 @@ export default function BookDetailsModal({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {/* Total Time */}
-                  <div className="bg-[#FAF7F2] rounded-xl border border-[#3E2C23]/10 p-3 text-center">
-                    <div className="flex items-center justify-center gap-1 text-[#4E3524] mb-1">
-                      <Clock className="w-3.5 h-3.5" />
-                    </div>
-                    <p className="text-base font-serif font-bold text-[#2C1D11]">
-                      {formatDuration(totalTimeSpent)}
-                    </p>
-                    <p className="text-[10px] font-sans text-[#6E5440]/70 mt-0.5">
-                      Total Time
-                    </p>
-                  </div>
+                  <StatCard
+                    icon={<Clock className="w-3.5 h-3.5" />}
+                    value={formatDuration(totalTimeSpent)}
+                    label="Total Time"
+                  />
 
                   {/* Sessions */}
-                  <div className="bg-[#FAF7F2] rounded-xl border border-[#3E2C23]/10 p-3 text-center">
-                    <div className="flex items-center justify-center gap-1 text-[#4E3524] mb-1">
-                      <BookOpen className="w-3.5 h-3.5" />
-                    </div>
-                    <p className="text-base font-serif font-bold text-[#2C1D11]">
-                      {sessionsCount}
-                    </p>
-                    <p className="text-[10px] font-sans text-[#6E5440]/70 mt-0.5">
-                      Sessions
-                    </p>
-                  </div>
+                  <StatCard
+                    icon={<BookOpen className="w-3.5 h-3.5" />}
+                    value={sessionsCount}
+                    label="Sessions"
+                  />
 
                   {/* Pages/Hour */}
-                  <div className="bg-[#FAF7F2] rounded-xl border border-[#3E2C23]/10 p-3 text-center">
-                    <div className="flex items-center justify-center gap-1 text-[#4E3524] mb-1">
-                      <BarChart2 className="w-3.5 h-3.5 rotate-90" />
-                    </div>
-                    <p className="text-base font-serif font-bold text-[#2C1D11]">
-                      {pagesPerHour}
-                    </p>
-                    <p className="text-[10px] font-sans text-[#6E5440]/70 mt-0.5">
-                      Pages/Hour
-                    </p>
-                  </div>
+                  <StatCard
+                    icon={<BarChart2 className="w-3.5 h-3.5 rotate-90" />}
+                    value={pagesPerHour}
+                    label="Pages/Hour"
+                  />
 
                   {/* Reading Period */}
-                  <div className="bg-[#FAF7F2] rounded-xl border border-[#3E2C23]/10 p-3 text-center">
-                    <div className="flex items-center justify-center gap-1 text-[#4E3524] mb-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                    </div>
-                    <p className="text-base font-serif font-bold text-[#2C1D11]">
-                      {readingPeriod}
-                    </p>
-                    <p className="text-[10px] font-sans text-[#6E5440]/70 mt-0.5">
-                      Reading Period
-                    </p>
-                  </div>
+                  <StatCard
+                    icon={<Calendar className="w-3.5 h-3.5" />}
+                    value={readingPeriod}
+                    label="Reading Period"
+                  />
                 </div>
               </div>
 
@@ -564,37 +538,17 @@ export default function BookDetailsModal({
               <div className="bg-[#F5EFE6]/60 rounded-2xl border border-[#3E2C23]/10 p-5">
                 <div className="grid grid-cols-2 gap-4">
                   {/* Started Date */}
-                  <div>
-                    <p className="text-sm font-serif font-semibold text-[#2C1D11] mb-2">
-                      Started Date
-                    </p>
-                    <div className="flex items-center gap-1.5 text-[#2C1D11]">
-                      <Calendar className="w-4 h-4 text-[#6E5440]/70" />
-                      <span className="text-sm font-sans">
-                        {formatDate(book.startedDate)}
-                      </span>
-                    </div>
-                  </div>
+                  <DateField
+                    label="Started Date"
+                    value={formatDate(book.startedDate)}
+                  />
 
                   {/* Finish Date */}
-                  <div>
-                    <p className="text-sm font-serif font-semibold text-[#2C1D11] mb-2">
-                      Finish Date
-                    </p>
-                    <div className="flex items-center gap-1.5 text-[#2C1D11]">
-                      <Calendar className="w-4 h-4 text-[#6E5440]/70" />
-                      <span className="text-sm font-sans">
-                        {book.finishedDate
-                          ? formatDate(book.finishedDate)
-                          : "—"}
-                      </span>
-                    </div>
-                    {!book.finishedDate && (
-                      <p className="text-[11px] font-sans text-[#6E5440]/60 mt-0.5">
-                        Not finished yet
-                      </p>
-                    )}
-                  </div>
+                  <DateField
+                    label="Finish Date"
+                    value={book.finishedDate ? formatDate(book.finishedDate) : "—"}
+                    hint={!book.finishedDate ? "Not finished yet" : undefined}
+                  />
                 </div>
               </div>
 
@@ -608,41 +562,11 @@ export default function BookDetailsModal({
       </div>
 
       {/* Restart Confirmation Dialog Modal */}
-      {showRestartConfirm && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-xs"
-            onClick={handleCancelRestart}
-          />
-          <div className="relative z-10 w-full max-w-sm bg-[#FAF7F2] rounded-2xl border border-[#3E2C23]/20 shadow-2xl p-6 text-center animate-fade-in">
-            <div className="w-12 h-12 rounded-full bg-[#F5EFE6] border border-[#3E2C23]/15 flex items-center justify-center mx-auto mb-3 text-2xl">
-              🔄
-            </div>
-            <h3 className="text-lg font-serif font-bold text-[#2C1D11] mb-2">
-              Restart Reading?
-            </h3>
-            <p className="text-xs font-sans text-[#6E5440]/80 leading-relaxed mb-6">
-              This book is already marked as completed. Would you like to restart reading from page 0 for a new session?
-            </p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleCancelRestart}
-                className="flex-1 py-2.5 bg-[#EBE4D8] hover:bg-[#E0D5C5] text-[#3E2C23] border border-[#3E2C23]/15 rounded-xl font-sans font-medium text-xs transition-colors cursor-pointer"
-              >
-                No
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmRestart}
-                className="flex-1 py-2.5 bg-[#3E2C23] hover:bg-[#2C1D11] text-[#F8F5F2] rounded-xl font-sans font-semibold text-xs transition-colors cursor-pointer shadow-sm"
-              >
-                Yes, Restart
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RestartConfirmDialog
+        isOpen={showRestartConfirm}
+        onCancel={handleCancelRestart}
+        onConfirm={handleConfirmRestart}
+      />
 
       {/* Start Reading multi-step modal (stacks above the details modal) */}
       <StartReadingModal

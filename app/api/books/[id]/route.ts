@@ -1,217 +1,119 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import connectDB from "@/lib/mongodb";
 import Book from "@/models/Book";
-import { verifyToken } from "@/lib/jwt";
+import { formatBook, withAuth } from "@/lib/api-helpers";
 
-interface BookSession {
-    startPage: number;
-    endPage: number;
-    duration: number;
-    createdAt?: Date;
-}
+export const DELETE = withAuth<Promise<{ id: string }>>(
+    async (request, { params }, user) => {
+        try {
+            await connectDB();
 
-interface BookData {
-    _id: {
-        toString(): string;
-    };
-    title: string;
-    author: string;
-    coverImage?: string;
-    genre?: string;
-    readingStatus: string;
-    totalPages: number;
-    currentPage: number;
-    language?: string;
-    startedDate?: Date | null;
-    finishedDate?: Date | null;
-    totalTimeSpent?: number;
-    sessionsCount?: number;
-    sessions?: BookSession[];
-    rating?: number;
-    createdAt?: Date;
-}
+            const { id } = await params;
 
-function formatBook(book: BookData) {
-    return {
-        id: book._id.toString(),
-        title: book.title,
-        author: book.author,
-        coverImage: book.coverImage,
-        genre: book.genre,
-        readingStatus: book.readingStatus,
-        totalPages: book.totalPages,
-        currentPage: book.currentPage,
-        language: book.language ?? "English",
-        startedDate: book.startedDate ?? null,
-        finishedDate: book.finishedDate ?? null,
-        totalTimeSpent: book.totalTimeSpent ?? 0,
-        sessionsCount: book.sessionsCount ?? 0,
-        sessions: (book.sessions ?? []).map((s) => ({
-            startPage: s.startPage,
-            endPage: s.endPage,
-            duration: s.duration,
-            createdAt: s.createdAt,
-        })),
-        rating: book.rating ?? 0,
-        createdAt: book.createdAt,
-    };
-}
+            const book = await Book.findOne({
+                _id: id,
+                userId: user.id,
+            });
 
-async function getAuthUser(token: string | undefined) {
-    if (!token) return null;
-    return verifyToken(token) as { id: string; username: string; email: string };
-}
+            if (!book) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Book not found.",
+                    },
+                    { status: 404 }
+                );
+            }
 
-export async function DELETE(
-    request: Request,
-    { params }: { params: Promise<{ id: string }> }
-) {
-    try {
-        await connectDB();
+            await Book.findByIdAndDelete(id);
 
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
+            return NextResponse.json(
+                {
+                    success: true,
+                    message: "Book deleted successfully.",
+                },
+                { status: 200 }
+            );
+        } catch (error) {
+            console.error(error);
 
-        if (!token) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Unauthorized",
+                    message: "Internal Server Error",
                 },
-                { status: 401 }
+                { status: 500 }
             );
         }
-
-        const decoded = await getAuthUser(token);
-        if (!decoded) {
-            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
-
-        const { id } = await params;
-
-        const book = await Book.findOne({
-            _id: id,
-            userId: decoded.id,
-        });
-
-        if (!book) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Book not found.",
-                },
-                { status: 404 }
-            );
-        }
-
-        await Book.findByIdAndDelete(id);
-
-        return NextResponse.json(
-            {
-                success: true,
-                message: "Book deleted successfully.",
-            },
-            { status: 200 }
-        );
-    } catch (error) {
-        console.error(error);
-
-        return NextResponse.json(
-            {
-                success: false,
-                message: "Internal Server Error",
-            },
-            { status: 500 }
-        );
     }
-}
+);
 
-export async function PUT(
-    request: Request,
-    { params }: { params: Promise<{ id: string }> }
-) {
-    try {
-        await connectDB();
+export const PUT = withAuth<Promise<{ id: string }>>(
+    async (request, { params }, user) => {
+        try {
+            await connectDB();
 
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
+            const { id } = await params;
 
-        if (!token) {
+            const {
+                title,
+                author,
+                coverImage,
+                genre,
+                readingStatus,
+                totalPages,
+                currentPage,
+                language,
+                startedDate,
+                finishedDate,
+            } = await request.json();
+
+            const book = await Book.findOne({
+                _id: id,
+                userId: user.id,
+            });
+
+            if (!book) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Book not found.",
+                    },
+                    { status: 404 }
+                );
+            }
+
+            book.title = title;
+            book.author = author;
+            book.coverImage = coverImage;
+            book.genre = genre;
+            book.readingStatus = readingStatus;
+            book.totalPages = totalPages;
+            book.currentPage = currentPage;
+            if (language !== undefined) book.language = language;
+            if (startedDate !== undefined) book.startedDate = startedDate;
+            if (finishedDate !== undefined) book.finishedDate = finishedDate;
+
+            await book.save();
+
+            return NextResponse.json(
+                {
+                    success: true,
+                    message: "Book updated successfully.",
+                    book: formatBook(book),
+                },
+                { status: 200 }
+            );
+        } catch (error) {
+            console.error(error);
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Unauthorized",
+                    message: "Internal Server Error",
                 },
-                { status: 401 }
+                { status: 500 }
             );
         }
-
-        const decoded = await getAuthUser(token);
-        if (!decoded) {
-            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
-
-        const { id } = await params;
-
-        const {
-            title,
-            author,
-            coverImage,
-            genre,
-            readingStatus,
-            totalPages,
-            currentPage,
-            language,
-            startedDate,
-            finishedDate,
-        } = await request.json();
-
-        const book = await Book.findOne({
-            _id: id,
-            userId: decoded.id,
-        });
-
-        if (!book) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Book not found.",
-                },
-                { status: 404 }
-            );
-        }
-
-        book.title = title;
-        book.author = author;
-        book.coverImage = coverImage;
-        book.genre = genre;
-        book.readingStatus = readingStatus;
-        book.totalPages = totalPages;
-        book.currentPage = currentPage;
-        if (language !== undefined) book.language = language;
-        if (startedDate !== undefined) book.startedDate = startedDate;
-        if (finishedDate !== undefined) book.finishedDate = finishedDate;
-
-        await book.save();
-
-        return NextResponse.json(
-            {
-                success: true,
-                message: "Book updated successfully.",
-                book: formatBook(book),
-            },
-            { status: 200 }
-        );
-    } catch (error) {
-        console.error(error);
-
-        return NextResponse.json(
-            {
-                success: false,
-                message: "Internal Server Error",
-            },
-            { status: 500 }
-        );
     }
-}
+);

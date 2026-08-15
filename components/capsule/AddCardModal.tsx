@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Bookmark, Type as TypeIcon } from "lucide-react";
 import { CapsuleItem } from "./types";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface AddCardModalProps {
   isOpen: boolean;
@@ -51,17 +52,7 @@ export default function AddCardModal({
   }, [isOpen, editCapsule]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  useEscapeKey(isOpen, onClose);
 
   if (!isOpen) return null;
 

@@ -6,16 +6,18 @@ if (!JWT_SECRET) {
     throw new Error("Please define the JWT_SECRET environment variable.");
 }
 
-export function generateToken(payload: {
+export interface AuthUserJwtPayload {
     id: string;
     username: string;
     email: string;
-}) {
+}
+
+export function generateToken(payload: AuthUserJwtPayload) {
     return jwt.sign(payload, JWT_SECRET, {
         expiresIn: "7d",
     });
 }
 
-export function verifyToken(token: string) {
-    return jwt.verify(token, JWT_SECRET);
+export function verifyToken(token: string): AuthUserJwtPayload {
+    return jwt.verify(token, JWT_SECRET) as AuthUserJwtPayload;
 }

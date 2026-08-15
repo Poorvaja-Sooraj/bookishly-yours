@@ -4,9 +4,11 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { X, Timer, Flag } from "lucide-react";
 import WheelPicker from "@/components/common/WheelPicker";
 import { useBooks } from "@/context/BookContext";
-import { Book } from "./BookCard";
+import { Book } from "@/lib/types/book";
 import AddToCapsuleModal from "@/components/capsule/AddToCapsuleModal";
 import FinishBookModal from "@/components/all-books/FinishBookModal";
+import { useScrollLock } from "@/lib/hooks/useScrollLock";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 type Step = "start-page" | "timer" | "end-page";
 
@@ -84,15 +86,7 @@ export default function StartReadingModal({
     prevIsOpenRef.current = isOpen;
   }, [isOpen, book.currentPage, book.totalPages, isRestarting]);
 
-  // Lock body scroll while open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   // Triggered when user clicks Close (X) button or backdrop
   const handleCloseClick = useCallback(() => {
@@ -105,17 +99,10 @@ export default function StartReadingModal({
     }
   }, [step, onClose]);
 
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !showCloseConfirm && !isCapsuleModalOpen && !finishModalBook) {
-        handleCloseClick();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, showCloseConfirm, isCapsuleModalOpen, finishModalBook, handleCloseClick]);
+  useEscapeKey(
+    isOpen && !showCloseConfirm && !isCapsuleModalOpen && !finishModalBook,
+    handleCloseClick
+  );
 
   // Timer tick
   useEffect(() => {

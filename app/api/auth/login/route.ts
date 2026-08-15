@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcrypt";
 import { generateToken } from "@/lib/jwt";
+import { setAuthCookie } from "@/lib/api-helpers";
 
 export async function POST(request: Request) {
     try {
@@ -66,13 +67,7 @@ export async function POST(request: Request) {
             { status: 200 }
         );
 
-        response.cookies.set("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 60 * 60 * 24 * 7, // 7 days
-            path: "/",
-        });
+        setAuthCookie(response, token);
 
         return response;
     } catch (error) {

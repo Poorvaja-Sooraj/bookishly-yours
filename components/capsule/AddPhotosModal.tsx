@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { X, Upload, Camera, Trash2, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { CapsuleItem } from "./types";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface AddPhotosModalProps {
   isOpen: boolean;
@@ -76,18 +77,10 @@ export default function AddPhotosModal({
     };
   }, [activeTab, isOpen]);
 
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        stopCamera();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  useEscapeKey(isOpen, () => {
+    stopCamera();
+    onClose();
+  });
 
   useEffect(() => {
     return () => {
