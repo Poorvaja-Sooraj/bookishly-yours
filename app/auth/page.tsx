@@ -4,6 +4,61 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+interface AuthTabSwitcherProps {
+  activeTab: "login" | "signup";
+  onTabChange: (tab: "login" | "signup") => void;
+}
+
+function AuthTabSwitcher({ activeTab, onTabChange }: AuthTabSwitcherProps) {
+  return (
+    <div className="relative flex w-full p-1 bg-[#EBE4D8]/90 backdrop-blur-xs rounded-2xl border border-[#3E2C23]/15 shadow-inner mb-4">
+      {/* Sliding Pill Indicator */}
+      <div
+        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#4E3524] rounded-xl shadow-md transition-all duration-300 ease-out ${
+          activeTab === "login" ? "left-1" : "left-[calc(50%+2px)]"
+        }`}
+      />
+      <button
+        type="button"
+        onClick={() => onTabChange("login")}
+        className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${
+          activeTab === "login"
+            ? "text-[#F8F5F2]"
+            : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
+        }`}
+      >
+        Login
+      </button>
+      <button
+        type="button"
+        onClick={() => onTabChange("signup")}
+        className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${
+          activeTab === "signup"
+            ? "text-[#F8F5F2]"
+            : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
+        }`}
+      >
+        Sign Up
+      </button>
+    </div>
+  );
+}
+
+interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  compact?: boolean;
+}
+
+function AuthInput({ compact, className = "", ...props }: AuthInputProps) {
+  return (
+    <input
+      {...props}
+      className={`w-full ${
+        compact ? "h-10 px-4 text-sm md:text-base" : "h-11 px-5 text-base"
+      } rounded-xl bg-[#FAF7F2]/95 border border-[#3E2C23]/25 text-[#2C1D11] placeholder:text-[#6E5440]/60 placeholder:italic font-sans focus:outline-none focus:ring-2 focus:ring-[#4E3524]/30 focus:border-[#4E3524] transition-all shadow-xs ${className}`}
+    />
+  );
+}
+
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
 
@@ -99,29 +154,7 @@ export default function AuthPage() {
         <div className="relative z-10 w-full max-w-sm flex flex-col items-center">
 
           {/* Fixed Tab Switcher Header */}
-          <div className="relative flex w-full p-1 bg-[#EBE4D8]/90 backdrop-blur-xs rounded-2xl border border-[#3E2C23]/15 shadow-inner mb-4">
-            {/* Sliding Pill Indicator */}
-            <div
-              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#4E3524] rounded-xl shadow-md transition-all duration-300 ease-out ${activeTab === "login" ? "left-1" : "left-[calc(50%+2px)]"
-                }`}
-            />
-            <button
-              type="button"
-              onClick={() => setActiveTab("login")}
-              className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${activeTab === "login" ? "text-[#F8F5F2]" : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
-                }`}
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("signup")}
-              className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${activeTab === "signup" ? "text-[#F8F5F2]" : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
-                }`}
-            >
-              Sign Up
-            </button>
-          </div>
+          <AuthTabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
 
           {/* Single Fixed Form Container */}
           <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
@@ -131,49 +164,47 @@ export default function AuthPage() {
               {activeTab === "login" ? (
                 /* LOGIN FIELDS (2 inputs) */
                 <div className="flex flex-col space-y-3 w-full animate-fade-in">
-                  <input
+                  <AuthInput
                     type="email"
                     required
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
                     placeholder="Email address"
-                    className="w-full h-11 px-5 rounded-xl bg-[#FAF7F2]/95 border border-[#3E2C23]/25 text-[#2C1D11] placeholder:text-[#6E5440]/60 placeholder:italic text-base font-sans focus:outline-none focus:ring-2 focus:ring-[#4E3524]/30 focus:border-[#4E3524] transition-all shadow-xs"
                   />
-                  <input
+                  <AuthInput
                     type="password"
                     required
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder="Password"
-                    className="w-full h-11 px-5 rounded-xl bg-[#FAF7F2]/95 border border-[#3E2C23]/25 text-[#2C1D11] placeholder:text-[#6E5440]/60 placeholder:italic text-base font-sans focus:outline-none focus:ring-2 focus:ring-[#4E3524]/30 focus:border-[#4E3524] transition-all shadow-xs"
                   />
                 </div>
               ) : (
                 /* SIGN UP FIELDS (3 inputs with compact uniform sizing) */
                 <div className="flex flex-col space-y-2 w-full animate-fade-in">
-                  <input
+                  <AuthInput
+                    compact
                     type="text"
                     required
                     value={signupUsername}
                     onChange={(e) => setSignupUsername(e.target.value)}
                     placeholder="Create username"
-                    className="w-full h-10 px-4 rounded-xl bg-[#FAF7F2]/95 border border-[#3E2C23]/25 text-[#2C1D11] placeholder:text-[#6E5440]/60 placeholder:italic text-sm md:text-base font-sans focus:outline-none focus:ring-2 focus:ring-[#4E3524]/30 focus:border-[#4E3524] transition-all shadow-xs"
                   />
-                  <input
+                  <AuthInput
+                    compact
                     type="email"
                     required
                     value={signupEmail}
                     onChange={(e) => setSignupEmail(e.target.value)}
                     placeholder="Email"
-                    className="w-full h-10 px-4 rounded-xl bg-[#FAF7F2]/95 border border-[#3E2C23]/25 text-[#2C1D11] placeholder:text-[#6E5440]/60 placeholder:italic text-sm md:text-base font-sans focus:outline-none focus:ring-2 focus:ring-[#4E3524]/30 focus:border-[#4E3524] transition-all shadow-xs"
                   />
-                  <input
+                  <AuthInput
+                    compact
                     type="password"
                     required
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
                     placeholder="Password"
-                    className="w-full h-10 px-4 rounded-xl bg-[#FAF7F2]/95 border border-[#3E2C23]/25 text-[#2C1D11] placeholder:text-[#6E5440]/60 placeholder:italic text-sm md:text-base font-sans focus:outline-none focus:ring-2 focus:ring-[#4E3524]/30 focus:border-[#4E3524] transition-all shadow-xs"
                   />
                 </div>
               )}

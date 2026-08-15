@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { BookOpen, Award, TrendingUp, Sparkles } from "lucide-react";
+import { Award, TrendingUp, Sparkles } from "lucide-react";
 import { useBooks } from "@/context/BookContext";
 
 export default function Statistics() {
-  const { stats, books } = useBooks();
+  const { stats } = useBooks();
 
   // Percentage calculations
   const total = stats.total || 1;

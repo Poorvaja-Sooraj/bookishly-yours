@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Mic, Camera, Edit3, Plus } from "lucide-react";
+import { Mic, Camera, Edit3 } from "lucide-react";
 import { CapsuleItem, CapsuleType } from "./types";
 import AddToCapsuleModal from "./AddToCapsuleModal";
 import CapsuleCategoryModal from "./CapsuleCategoryModal";
@@ -42,6 +42,7 @@ export default function ReadersAddedContent({
   }, [bookId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCapsules();
 
     const handleCapsuleSaved = (e: Event) => {

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { X, Upload, Camera, Trash2, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { CapsuleItem } from "./types";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface AddPhotosModalProps {
   isOpen: boolean;
@@ -23,7 +24,6 @@ export default function AddPhotosModal({
   const [activeTab, setActiveTab] = useState<TabType>("upload");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [caption, setCaption] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,40 +42,6 @@ export default function AddPhotosModal({
     setIsCameraActive(false);
   };
 
-  useEffect(() => {
-    if (activeTab === "camera" && isOpen) {
-      startCamera();
-    } else {
-      stopCamera();
-    }
-    return () => {
-      stopCamera();
-    };
-  }, [activeTab, isOpen]);
-
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        stopCamera();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl && previewUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
-  if (!isOpen) return null;
-
   const startCamera = async () => {
     try {
       setError("");
@@ -93,6 +59,38 @@ export default function AddPhotosModal({
       setIsCameraActive(false);
     }
   };
+
+  useEffect(() => {
+    if (activeTab === "camera" && isOpen) {
+      const start = async () => {
+        await startCamera();
+      };
+
+      start();
+    }
+
+    return () => {
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
+    };
+  }, [activeTab, isOpen]);
+
+  useEscapeKey(isOpen, () => {
+    stopCamera();
+    onClose();
+  });
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  if (!isOpen) return null;
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -192,7 +190,7 @@ export default function AddPhotosModal({
         body: JSON.stringify({
           type: "photo",
           imageUrl,
-          caption: caption.trim(),
+          caption: "",
         }),
       });
 
@@ -203,9 +201,13 @@ export default function AddPhotosModal({
       } else {
         setError(data.message || "Failed to save photo capsule.");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message || "An error occurred while uploading photo.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An error occurred while uploading photo."
+      );
     } finally {
       setSaving(false);
     }
@@ -252,22 +254,20 @@ export default function AddPhotosModal({
           <button
             type="button"
             onClick={() => setActiveTab("upload")}
-            className={`flex-1 py-2 text-xs font-sans font-semibold border-b-2 text-center transition-colors cursor-pointer ${
-              activeTab === "upload"
-                ? "border-[#3E2C23] text-[#3E2C23]"
-                : "border-transparent text-[#6E5440]/60 hover:text-[#2C1D11]"
-            }`}
+            className={`flex-1 py-2 text-xs font-sans font-semibold border-b-2 text-center transition-colors cursor-pointer ${activeTab === "upload"
+              ? "border-[#3E2C23] text-[#3E2C23]"
+              : "border-transparent text-[#6E5440]/60 hover:text-[#2C1D11]"
+              }`}
           >
             Upload
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("camera")}
-            className={`flex-1 py-2 text-xs font-sans font-semibold border-b-2 text-center transition-colors cursor-pointer ${
-              activeTab === "camera"
-                ? "border-[#3E2C23] text-[#3E2C23]"
-                : "border-transparent text-[#6E5440]/60 hover:text-[#2C1D11]"
-            }`}
+            className={`flex-1 py-2 text-xs font-sans font-semibold border-b-2 text-center transition-colors cursor-pointer ${activeTab === "camera"
+              ? "border-[#3E2C23] text-[#3E2C23]"
+              : "border-transparent text-[#6E5440]/60 hover:text-[#2C1D11]"
+              }`}
           >
             Camera
           </button>

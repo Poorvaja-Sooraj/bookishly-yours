@@ -12,7 +12,10 @@ import {
   Library,
 } from "lucide-react";
 import { useBooks } from "@/context/BookContext";
-import { Book } from "./BookCard";
+import { useScrollLock } from "@/lib/hooks/useScrollLock";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { Book } from "@/lib/types/book";
+import Image from "next/image";
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -43,6 +46,8 @@ export default function AddBookModal({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
+
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
       setSelectedFile(null);
@@ -64,6 +69,7 @@ export default function AddBookModal({
     }
   }, [isOpen, mode, book, defaultStatus]);
 
+
   useEffect(() => {
     if (selectedFile) {
       const objectUrl = URL.createObjectURL(selectedFile);
@@ -77,28 +83,10 @@ export default function AddBookModal({
       setPreviewUrl(null);
     }
   }, [selectedFile, mode, book]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Lock body scroll while modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  // Handle Escape key press to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  useScrollLock(isOpen);
+  useEscapeKey(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -259,7 +247,7 @@ export default function AddBookModal({
                 <div className="border-2 border-dashed border-[#C4A890]/70 bg-[#F4EDE2]/50 hover:bg-[#F0E6D8]/80 rounded-2xl p-3 flex flex-col items-center justify-center text-center transition-colors min-h-[160px] h-full relative group overflow-hidden">
                   {previewUrl ? (
                     <div className="relative w-full h-36 rounded-xl overflow-hidden shadow-xs flex items-center justify-center bg-[#FAF7F2]">
-                      <img
+                      <Image
                         src={previewUrl}
                         alt="Book cover preview"
                         className="w-full h-full object-cover"

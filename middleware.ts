@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
         const secretKey = new TextEncoder().encode(JWT_SECRET);
         await jwtVerify(token, secretKey);
         return NextResponse.next();
-    } catch (error) {
+    } catch {
         return NextResponse.redirect(new URL("/auth", request.url));
     }
 }
