@@ -50,12 +50,12 @@ export default function Sidebar({
         <div className="flex items-center justify-between mb-4 md:mb-5 pb-3 border-b border-[#3E2C23]/60">
           <Link href="/dashboard" className="block relative w-full h-16 md:h-20 lg:h-22 max-w-[230px] lg:max-w-[250px]">
             <Image
-              src="/branding/logo_bgremoved.png"
+              src="/branding/logo.png"
               alt="Bookishly Yours Logo"
               fill
               sizes="260px"
               priority
-              className="object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+              className="object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
             />
           </Link>
           {isMobile && (
@@ -83,11 +83,10 @@ export default function Sidebar({
                 key={item.label}
                 href={item.href}
                 onClick={() => isMobile && setMobileOpen?.(false)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E6B89C]/50 ${
-                  isActive
-                    ? "bg-[#4E3524] text-[#F8F5F2] shadow-md border border-[#6E5440]/30 font-semibold"
-                    : "text-[#D4C3B3] hover:bg-[#3E2C23]/80 hover:text-[#F8F5F2]"
-                }`}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E6B89C]/50 border ${isActive
+                  ? "bg-[#4E3524] text-[#F8F5F2] shadow-md border-[#6E5440]/30 font-semibold"
+                  : "text-[#D4C3B3] border-transparent hover:bg-[#3E2C23]/80 hover:text-[#F8F5F2]"
+                  }`}
               >
                 <Icon className={`w-4.5 h-4.5 ${isActive ? "text-[#E6B89C]" : "text-[#B8A08C]"}`} />
                 <span>{item.label}</span>
@@ -102,7 +101,7 @@ export default function Sidebar({
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium text-[#E8A598] hover:bg-[#3E2C23] hover:text-[#FFC4B8] transition-colors cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8A598]/50"
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium text-[#E8A598] hover:bg-[#3E2C23] hover:text-[#FFC4B8] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8A598]/50"
         >
           <LogOut className="w-4.5 h-4.5 text-[#E8A598]" />
           <span>Logout</span>

@@ -20,7 +20,7 @@ export default function Hero() {
         {/* Logo Container - Pure logo without any blurred box or white overlay */}
         <div className="relative w-full max-w-[680px] h-auto mt-6 md:mt-0 -mb-5 animate-fade-in flex items-center justify-center">
           <Image
-            src="/branding/logo_bgremoved.png"
+            src="/branding/logo_removed.png"
             alt="Bookishly Yours Logo"
             width={1408}
             height={636}

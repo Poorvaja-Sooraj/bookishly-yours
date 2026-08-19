@@ -38,18 +38,27 @@ export default function AddBookModal({
   const [author, setAuthor] = useState("");
   const [readingStatus, setReadingStatus] = useState<
     "Completed" | "Currently Reading" | "Want to Read" | ""
-  >(defaultStatus || "Completed");
+  >(defaultStatus || "Want to Read");
   const [genre, setGenre] = useState("");
-  const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState<number | "">("");
+  const [currentPage, setCurrentPage] = useState<number | "">("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [validationError, setValidationError] = useState("");
+
+  // Auto-clear validation error when the user changes any required field
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (validationError) setValidationError("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, author, genre, selectedFile, totalPages, currentPage, readingStatus]);
 
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
+      setValidationError("");
       setSelectedFile(null);
       if (mode === "edit" && book) {
         setTitle(book.title);
@@ -62,9 +71,9 @@ export default function AddBookModal({
         setTitle("");
         setAuthor("");
         setGenre("");
-        setTotalPages(0);
-        setCurrentPage(0);
-        setReadingStatus(defaultStatus || "Completed");
+        setTotalPages("");
+        setCurrentPage("");
+        setReadingStatus(defaultStatus || "Want to Read");
       }
     }
   }, [isOpen, mode, book, defaultStatus]);
@@ -93,9 +102,28 @@ export default function AddBookModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const bookTitle = title.trim() || "Untitled Book";
-    const bookAuthor = author.trim() || "Unknown Author";
-    const status = readingStatus || "Completed";
+    // Validate required fields
+    const missingFields: string[] = [];
+    if (mode === "add" && !selectedFile && !previewUrl) missingFields.push("Book Cover");
+    if (!title.trim()) missingFields.push("Book Name");
+    if (!author.trim()) missingFields.push("Author Name");
+    if (!readingStatus) missingFields.push("Reading Status");
+    if (!genre) missingFields.push("Genre");
+    if (totalPages === "" || totalPages === undefined) missingFields.push("Total Pages");
+    if (currentPage === "" || currentPage === undefined) missingFields.push("Currently on Page");
+
+    if (missingFields.length > 0) {
+      setValidationError(`Please fill in: ${missingFields.join(", ")}`);
+      return;
+    }
+
+    setValidationError("");
+
+    const bookTitle = title.trim();
+    const bookAuthor = author.trim();
+    const status = readingStatus || "Want to Read";
+    const parsedTotalPages = Math.max(0, Number(totalPages) || 0);
+    const parsedCurrentPage = Math.max(0, Number(currentPage) || 0);
     const imageUrl = await uploadImage();
 
     const finalImage =
@@ -108,8 +136,8 @@ export default function AddBookModal({
         coverImage: finalImage,
         genre,
         readingStatus: status,
-        totalPages,
-        currentPage,
+        totalPages: parsedTotalPages,
+        currentPage: parsedCurrentPage,
       });
     } else {
       await addBook({
@@ -118,16 +146,16 @@ export default function AddBookModal({
         coverImage: finalImage,
         genre,
         readingStatus: status,
-        totalPages,
-        currentPage,
+        totalPages: parsedTotalPages,
+        currentPage: parsedCurrentPage,
       });
     }
     setTitle("");
     setAuthor("");
     setGenre("");
-    setTotalPages(0);
-    setCurrentPage(0);
-    setReadingStatus(defaultStatus || "Completed");
+    setTotalPages("");
+    setCurrentPage("");
+    setReadingStatus(defaultStatus || "Want to Read");
     onClose();
   };
 
@@ -174,7 +202,7 @@ export default function AddBookModal({
         aria-modal="true"
         aria-labelledby="add-book-modal-title"
         onSubmit={handleSubmit}
-        className="relative w-full max-w-2xl bg-[#FAF7F2] rounded-2xl sm:rounded-3xl border border-[#3E2C23]/20 shadow-2xl overflow-hidden z-10 animate-fade-in my-auto max-h-[92vh] flex flex-col active:scale-[0.99] transition-transform duration-200"
+        className="relative w-full max-w-2xl bg-[#FAF7F2] rounded-2xl sm:rounded-3xl border border-[#3E2C23]/20 shadow-2xl overflow-hidden z-10 animate-fade-in my-auto max-h-[92vh] flex flex-col"
       >
         {/* Header Section */}
         <div className="relative bg-[#F3EBE0]/80 border-b border-[#3E2C23]/10 px-6 py-5 flex flex-col items-center justify-center text-center shrink-0">
@@ -190,24 +218,7 @@ export default function AddBookModal({
 
           {/* Decorative Top Stamp */}
           <div className="w-10 h-10 rounded-full bg-[#EBE4D8] border border-[#C4A890]/50 flex items-center justify-center mb-2 shadow-xs">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 100 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M50 38C38 38 20 22 8 22C4 22 2 24 2 28C2 38 20 54 50 54C80 54 98 38 98 28C98 24 96 22 92 22C80 22 62 38 50 38Z"
-                fill="#3E2C23"
-                opacity="0.9"
-              />
-              <circle cx="50" cy="18" r="4" fill="#3E2C23" />
-              <circle cx="22" cy="34" r="2" fill="#7A5A3E" />
-              <circle cx="78" cy="34" r="2" fill="#7A5A3E" />
-              <circle cx="34" cy="28" r="1.5" fill="#7A5A3E" />
-              <circle cx="66" cy="28" r="1.5" fill="#7A5A3E" />
-            </svg>
+            <BookOpen className="w-5 h-5 text-[#3E2C23]" />
           </div>
 
           <h2
@@ -225,6 +236,15 @@ export default function AddBookModal({
 
         {/* Modal Form Body */}
         <div className="p-5 sm:p-6 space-y-4 md:space-y-5 overflow-y-auto flex-1">
+          {/* Validation Error Banner */}
+          {validationError && (
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-[#A93226]/10 border border-[#A93226]/25 rounded-xl text-[#A93226] text-xs sm:text-sm font-sans font-medium">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+              </svg>
+              <span>{validationError}</span>
+            </div>
+          )}
           {/* Row 1: Book Cover Upload (Left) & Book Name / Author Name (Right) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Book Cover Upload Box */}
@@ -411,8 +431,17 @@ export default function AddBookModal({
                 </div>
                 <input
                   type="number"
+                  min="0"
                   value={totalPages}
-                  onChange={(e) => setTotalPages(Number(e.target.value))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") {
+                      setTotalPages("");
+                    } else {
+                      const num = Number(val);
+                      setTotalPages(isNaN(num) ? "" : Math.max(0, num));
+                    }
+                  }}
                   placeholder="Enter total pages"
                   className="w-full h-11 pl-9 pr-3.5 bg-[#FAF7F2] border border-[#3E2C23]/20 rounded-xl text-xs sm:text-sm font-sans text-[#2C1D11] placeholder:text-[#6E5440]/50 focus:outline-none focus:ring-2 focus:ring-[#4E3524]/20 focus:border-[#4E3524] transition-all shadow-xs"
                 />
@@ -430,8 +459,17 @@ export default function AddBookModal({
                 </div>
                 <input
                   type="number"
+                  min="0"
                   value={currentPage}
-                  onChange={(e) => setCurrentPage(Number(e.target.value))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") {
+                      setCurrentPage("");
+                    } else {
+                      const num = Number(val);
+                      setCurrentPage(isNaN(num) ? "" : Math.max(0, num));
+                    }
+                  }}
                   placeholder="Enter current page (0 if starting)"
                   className="w-full h-11 pl-9 pr-3.5 bg-[#FAF7F2] border border-[#3E2C23]/20 rounded-xl text-xs sm:text-sm font-sans text-[#2C1D11] placeholder:text-[#6E5440]/50 focus:outline-none focus:ring-2 focus:ring-[#4E3524]/20 focus:border-[#4E3524] transition-all shadow-xs"
                 />

@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from "react";
 import { Plus, Search, BookOpen } from "lucide-react";
 import BookGrid from "./BookGrid";
-import { useScrollLock } from "@/lib/hooks/useScrollLock";
 import { Book } from "@/lib/types/book";
 import AddBookModal from "./AddBookModal";
 import BookDetailsModal from "./BookDetailsModal";
@@ -34,8 +33,6 @@ export default function BooksPageContainer({
     () => books.find((b) => b.id === selectedBookId),
     [books, selectedBookId]
   );
-
-  useScrollLock(isAddBookOpen || isDetailsOpen);
 
   // 1. Filter books by category status if provided
   const categoryBooks = useMemo(() => {

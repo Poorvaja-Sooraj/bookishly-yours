@@ -25,12 +25,12 @@ export default function DashboardLayout({
         <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#2C1D11] text-[#F8F5F2] border-b border-[#3E2C23]/50 sticky top-0 z-20 shadow-md">
           <Link href="/dashboard" className="relative w-36 h-9">
             <Image
-              src="/branding/logo_bgremoved.png"
+              src="/branding/logo_removed.png"
               alt="Bookishly Yours Logo"
               fill
               sizes="150px"
               priority
-              className="object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]"
+              className="object-contain brightness-0 invert drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]"
             />
           </Link>
           <button
