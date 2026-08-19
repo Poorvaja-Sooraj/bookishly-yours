@@ -6,7 +6,6 @@ import {
   X,
   Calendar,
   BookOpen,
-  Globe,
   Clock,
   BarChart2,
   Trash2,
@@ -426,13 +425,6 @@ export default function BookDetailsModal({
                   icon={<BookOpen className="w-3.5 h-3.5" />}
                   label="Pages"
                   value={`${book.totalPages} pages.`}
-                />
-
-                {/* Language */}
-                <BookMetaRow
-                  icon={<Globe className="w-3.5 h-3.5" />}
-                  label="Language"
-                  value={book.language ?? "English"}
                 />
               </div>
 

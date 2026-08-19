@@ -70,6 +70,12 @@ export default function AuthPage() {
 
     try {
       if (activeTab === "signup") {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(signupEmail)) {
+          alert("Please enter a valid email address.");
+          return;
+        }
+
         const response = await fetch("/api/auth/signup", {
           method: "POST",
           headers: {
@@ -161,11 +167,11 @@ export default function AuthPage() {
                 /* LOGIN FIELDS (2 inputs) */
                 <div className="flex flex-col space-y-3 w-full animate-fade-in">
                   <AuthInput
-                    type="email"
+                    type="text"
                     required
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder="Email address"
+                    placeholder="Username or email address"
                   />
                   <AuthInput
                     type="password"

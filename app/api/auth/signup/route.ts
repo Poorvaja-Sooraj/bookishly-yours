@@ -20,6 +20,17 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Please enter a valid email address.",
+                },
+                { status: 400 }
+            );
+        }
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {

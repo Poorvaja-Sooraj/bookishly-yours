@@ -11,23 +11,34 @@ export async function POST(request: Request) {
 
         const { email, password } = await request.json();
 
-        if (!email || !password) {
+        const identifier = email?.trim();
+
+        if (!identifier || !password) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Email and password are required.",
+                    message: "Username/Email and password are required.",
                 },
                 { status: 400 }
             );
         }
 
-        const user = await User.findOne({ email });
+        const escapeRegExp = (str: string) => {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        };
+
+        const user = await User.findOne({
+            $or: [
+                { email: identifier.toLowerCase() },
+                { username: { $regex: new RegExp(`^${escapeRegExp(identifier)}$`, "i") } }
+            ]
+        });
 
         if (!user) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Invalid email or password.",
+                    message: "The entered username or email address is not registered.",
                 },
                 { status: 401 }
             );
@@ -42,7 +53,7 @@ export async function POST(request: Request) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Invalid email or password.",
+                    message: "Incorrect password.",
                 },
                 { status: 401 }
             );
