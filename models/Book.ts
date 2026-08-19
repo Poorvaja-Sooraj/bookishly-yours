@@ -130,6 +130,8 @@ const BookSchema = new Schema(
     }
 );
 
+BookSchema.index({ userId: 1, createdAt: -1 });
+
 const Book =
     models.Book || mongoose.model<IBook>("Book", BookSchema);
 

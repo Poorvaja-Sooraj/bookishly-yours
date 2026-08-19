@@ -9,6 +9,7 @@ export default function Welcome() {
         alt="Welcome to Bookishly Yours"
         width={1920}
         height={340}
+        sizes="100vw"
         priority
         className="w-full h-auto object-cover object-center max-h-[140px] sm:max-h-[175px] md:max-h-[200px] lg:max-h-[220px]"
       />

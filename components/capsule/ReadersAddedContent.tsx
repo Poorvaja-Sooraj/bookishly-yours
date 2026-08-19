@@ -52,7 +52,6 @@ export default function ReadersAddedContent({
           const newCap = customEvent.detail.capsule;
           setCapsules((prev) => [newCap, ...prev.filter((c) => c.id !== newCap.id)]);
         }
-        fetchCapsules();
       }
     };
 
