@@ -250,7 +250,10 @@ export default function AddBookModal({
                       <Image
                         src={previewUrl}
                         alt="Book cover preview"
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="300px"
+                        unoptimized={previewUrl.startsWith("blob:")}
+                        className="object-cover"
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-2">
                         <Library className="w-5 h-5 mb-1" />

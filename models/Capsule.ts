@@ -67,6 +67,8 @@ const CapsuleSchema = new Schema(
   }
 );
 
+CapsuleSchema.index({ userId: 1, bookId: 1, createdAt: -1 });
+
 const Capsule =
   models.Capsule || mongoose.model<ICapsule>("Capsule", CapsuleSchema);
 

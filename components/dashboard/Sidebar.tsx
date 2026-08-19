@@ -19,19 +19,19 @@ interface SidebarProps {
   setMobileOpen?: (open: boolean) => void;
 }
 
+const menuItems = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "All Books", href: "/dashboard/all-books", icon: Library },
+  { label: "Completed Books", href: "/dashboard/completed", icon: BookCheck },
+  { label: "Currently Reading", href: "/dashboard/currently-reading", icon: BookOpen },
+  { label: "Want to Read", href: "/dashboard/want-to-read", icon: Bookmark },
+];
+
 export default function Sidebar({
   mobileOpen = false,
   setMobileOpen,
 }: SidebarProps) {
   const pathname = usePathname();
-
-  const menuItems = [
-    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "All Books", href: "/dashboard/all-books", icon: Library },
-    { label: "Completed Books", href: "/dashboard/completed", icon: BookCheck },
-    { label: "Currently Reading", href: "/dashboard/currently-reading", icon: BookOpen },
-    { label: "Want to Read", href: "/dashboard/want-to-read", icon: Bookmark },
-  ];
 
   const handleLogout = async () => {
     try {

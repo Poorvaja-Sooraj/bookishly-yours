@@ -281,6 +281,7 @@ export default function AddPhotosModal({
               alt="Photo preview"
               fill
               sizes="(max-width: 640px) 100vw, 400px"
+              unoptimized={previewUrl.startsWith("blob:")}
               className="object-cover"
             />
             <button
