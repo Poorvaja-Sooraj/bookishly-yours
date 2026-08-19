@@ -14,29 +14,26 @@ function AuthTabSwitcher({ activeTab, onTabChange }: AuthTabSwitcherProps) {
     <div className="relative flex w-full p-1 bg-[#EBE4D8]/90 backdrop-blur-xs rounded-2xl border border-[#3E2C23]/15 shadow-inner mb-4">
       {/* Sliding Pill Indicator */}
       <div
-        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#4E3524] rounded-xl shadow-md transition-all duration-300 ease-out ${
-          activeTab === "login" ? "left-1" : "left-[calc(50%+2px)]"
-        }`}
+        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#4E3524] rounded-xl shadow-md transition-all duration-300 ease-out ${activeTab === "login" ? "left-1" : "left-[calc(50%+2px)]"
+          }`}
       />
       <button
         type="button"
         onClick={() => onTabChange("login")}
-        className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${
-          activeTab === "login"
+        className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${activeTab === "login"
             ? "text-[#F8F5F2]"
             : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
-        }`}
+          }`}
       >
         Login
       </button>
       <button
         type="button"
         onClick={() => onTabChange("signup")}
-        className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${
-          activeTab === "signup"
+        className={`relative z-10 w-1/2 py-2.5 text-base md:text-lg font-serif font-medium text-center transition-colors duration-200 cursor-pointer ${activeTab === "signup"
             ? "text-[#F8F5F2]"
             : "text-[#5A3E2B]/80 hover:text-[#3E2C23]"
-        }`}
+          }`}
       >
         Sign Up
       </button>
@@ -52,9 +49,8 @@ function AuthInput({ compact, className = "", ...props }: AuthInputProps) {
   return (
     <input
       {...props}
-      className={`w-full ${
-        compact ? "h-10 px-4 text-sm md:text-base" : "h-11 px-5 text-base"
-      } rounded-xl bg-[#FAF7F2]/95 border border-[#3E2C23]/25 text-[#2C1D11] placeholder:text-[#6E5440]/60 placeholder:italic font-sans focus:outline-none focus:ring-2 focus:ring-[#4E3524]/30 focus:border-[#4E3524] transition-all shadow-xs ${className}`}
+      className={`w-full ${compact ? "h-10 px-4 text-sm md:text-base" : "h-11 px-5 text-base"
+        } rounded-xl bg-[#FAF7F2]/95 border border-[#3E2C23]/25 text-[#2C1D11] placeholder:text-[#6E5440]/60 placeholder:italic font-sans focus:outline-none focus:ring-2 focus:ring-[#4E3524]/30 focus:border-[#4E3524] transition-all shadow-xs ${className}`}
     />
   );
 }
@@ -141,7 +137,7 @@ export default function AuthPage() {
           className="relative w-full max-w-[420px] md:max-w-[480px] h-auto mb-4 md:mb-5 flex items-center justify-center cursor-pointer block"
         >
           <Image
-            src="/branding/logo_bgremoved.png"
+            src="/branding/logo_removed.png"
             alt="Bookishly Yours Logo"
             width={1408}
             height={636}
@@ -213,7 +209,7 @@ export default function AuthPage() {
             {/* 3. Fixed Submit Button - Stays in exact same vertical position at all times */}
             <button
               type="submit"
-              className="w-full py-3.5 px-6 bg-[#1A2B4C] text-[#F8F5F2] rounded-xl text-base md:text-lg font-medium shadow-md hover:bg-[#14233F] hover:shadow-lg transition-all duration-200 active:scale-[0.99] cursor-pointer"
+              className="w-full py-3.5 px-6 bg-[#3E2C23] text-[#F8F5F2] rounded-xl text-base md:text-lg font-medium shadow-md hover:bg-[#2C1D11] hover:shadow-lg transition-all duration-200 active:scale-[0.99] cursor-pointer"
             >
               {activeTab === "login" ? "Login" : "Create Account"}
             </button>
@@ -224,25 +220,25 @@ export default function AuthPage() {
                 <>
                   <button
                     type="button"
-                    className="text-[#3E2C23]/80 hover:text-[#1A2B4C] hover:underline font-sans transition-colors cursor-pointer"
+                    className="text-[#5A3E2B]/80 hover:text-[#2C1D11] hover:underline font-sans transition-colors cursor-pointer"
                   >
                     Forgot Password?
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveTab("signup")}
-                    className="text-[#3E2C23]/80 hover:text-[#1A2B4C] hover:underline font-sans transition-colors cursor-pointer"
+                    className="text-[#5A3E2B]/80 hover:text-[#2C1D11] hover:underline font-sans transition-colors cursor-pointer"
                   >
-                    Don&apos;t have an account? <span className="font-semibold text-[#1A2B4C]">Sign Up</span>
+                    Don&apos;t have an account? <span className="font-semibold text-[#3E2C23]">Sign Up</span>
                   </button>
                 </>
               ) : (
                 <button
                   type="button"
                   onClick={() => setActiveTab("login")}
-                  className="text-[#3E2C23]/80 hover:text-[#1A2B4C] hover:underline font-sans transition-colors cursor-pointer"
+                  className="text-[#5A3E2B]/80 hover:text-[#2C1D11] hover:underline font-sans transition-colors cursor-pointer"
                 >
-                  Already have an account? <span className="font-semibold text-[#1A2B4C]">Switch to login form</span>
+                  Already have an account? <span className="font-semibold text-[#3E2C23]">Switch to login form</span>
                 </button>
               )}
             </div>
