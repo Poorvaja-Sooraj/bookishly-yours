@@ -60,6 +60,9 @@ export default function StartReadingModal({
   const wasRunningRef = useRef(false);
   const prevIsOpenRef = useRef(false);
 
+  const [cameFromCloseConfirm, setCameFromCloseConfirm] = useState(false);
+  const [hasExplicitlyChosenEndPage, setHasExplicitlyChosenEndPage] = useState(false);
+
   // Reset when modal transitions from closed to open
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -70,6 +73,8 @@ export default function StartReadingModal({
       setShowCloseConfirm(false);
       setFinishModalBook(null);
       wasRunningRef.current = false;
+      setCameFromCloseConfirm(false);
+      setHasExplicitlyChosenEndPage(false);
       const initStart = isRestarting ? 0 : Math.max(0, book.currentPage);
       setStartPage(initStart);
       setEndPage(Math.min(initStart + 1, book.totalPages));
@@ -155,6 +160,13 @@ export default function StartReadingModal({
     setIsPaused(true);
     setEndPage(Math.min(startPage + 1, book.totalPages));
     setStep("end-page");
+    setCameFromCloseConfirm(false);
+    setHasExplicitlyChosenEndPage(false);
+  };
+
+  const handleEndPageChange = (val: number) => {
+    setEndPage(val);
+    setHasExplicitlyChosenEndPage(true);
   };
 
   const handleSaveSession = async () => {
@@ -180,9 +192,11 @@ export default function StartReadingModal({
   };
 
   // User selects "Yes" in confirmation dialog
-  const handleConfirmSave = async () => {
+  const handleConfirmSave = () => {
     setShowCloseConfirm(false);
-    await handleSaveSession();
+    setStep("end-page");
+    setCameFromCloseConfirm(true);
+    setHasExplicitlyChosenEndPage(false);
   };
 
   // User selects "No" in confirmation dialog
@@ -340,7 +354,7 @@ export default function StartReadingModal({
                   min={endMin}
                   max={endMax}
                   value={endPage}
-                  onChange={setEndPage}
+                  onChange={handleEndPageChange}
                 />
               </div>
 
@@ -351,14 +365,16 @@ export default function StartReadingModal({
               <button
                 type="button"
                 onClick={handleSaveSession}
-                disabled={saving}
+                disabled={saving || (cameFromCloseConfirm && !hasExplicitlyChosenEndPage)}
                 className="w-full py-3 bg-[#3E2C23] hover:bg-[#2C1D11] text-[#F8F5F2] rounded-xl font-sans font-semibold text-sm transition-colors cursor-pointer shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {saving
                   ? "Saving..."
-                  : endPage >= book.totalPages
-                    ? "Finish Book 🎉"
-                    : "Save Session"}
+                  : cameFromCloseConfirm && !hasExplicitlyChosenEndPage
+                    ? "Please select final page"
+                    : endPage >= book.totalPages
+                      ? "Finish Book 🎉"
+                      : "Save Session"}
               </button>
             </div>
           )}
